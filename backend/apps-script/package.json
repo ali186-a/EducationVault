@@ -1,0 +1,6 @@
+{
+  "name": "educationvault-backend",
+  "private": true,
+  "description": "Unit tests for the EducationVault Apps Script backend (mocked Drive/Firebase).",
+  "scripts": { "test": "node --test" }
+}
