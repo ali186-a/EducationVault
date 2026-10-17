@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EducationVault</string>
+    <string name="tagline">آپ کی تعلیمی دستاویزات کی محفوظ تجوری</string>
+    <string name="config_missing_title">ایپ کی ترتیب مکمل نہیں</string>
+    <string name="config_missing_body">فائل app-config.properties میں یہ قدریں درست کریں، پھر ایپ دوبارہ بنائیں:</string>
+    <string name="ping_button">بیک اینڈ سے رابطہ جانچیں</string>
+    <string name="ping_ok">بیک اینڈ سے رابطہ ہو گیا اور اس کی ترتیب درست ہے۔</string>
+    <string name="ping_not_configured">بیک اینڈ مل گیا مگر اس کی Script Properties مکمل نہیں۔</string>
+    <string name="ping_http_error">بیک اینڈ نے خرابی لوٹائی (کوڈ %1$d)۔ ڈپلائمنٹ کی سیٹنگز دیکھیں۔</string>
+    <string name="ping_not_backend">یہ URL EducationVault بیک اینڈ کا جواب نہیں دے رہا۔ ڈپلائمنٹ میں Who has access: Anyone ہونا چاہیے۔</string>
+    <string name="ping_network_error">انٹرنیٹ یا نیٹ ورک کا مسئلہ ہے۔ دوبارہ کوشش کریں۔</string>
+    <string name="version_label">ورژن %1$s (ابتدائی ٹیسٹ ورژن)</string>
+</resources>

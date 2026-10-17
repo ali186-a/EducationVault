@@ -1,0 +1,25 @@
+# Secrets - never commit
+client_secret*.json
+*.keystore
+*.jks
+google-services.json
+.env
+.env.*
+local.properties
+
+# Build output
+.gradle/
+build/
+*.apk
+*.aab
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Node (backend tests)
+node_modules/
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store

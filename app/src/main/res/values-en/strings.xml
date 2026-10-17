@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EducationVault</string>
+    <string name="tagline">A safe vault for your education documents</string>
+    <string name="config_missing_title">App configuration is incomplete</string>
+    <string name="config_missing_body">Fix these values in app-config.properties, then rebuild the app:</string>
+    <string name="ping_button">Check backend connection</string>
+    <string name="ping_ok">Connected to the backend and it is configured correctly.</string>
+    <string name="ping_not_configured">Backend reached, but its Script Properties are incomplete.</string>
+    <string name="ping_http_error">The backend returned an error (code %1$d). Check the deployment settings.</string>
+    <string name="ping_not_backend">This URL is not answering as the EducationVault backend. The deployment needs Who has access: Anyone.</string>
+    <string name="ping_network_error">Network problem. Please try again.</string>
+    <string name="version_label">Version %1$s (early test build)</string>
+</resources>
