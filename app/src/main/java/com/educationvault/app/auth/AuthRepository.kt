@@ -77,6 +77,12 @@ class AuthRepository(context: Context) {
         net { firebase.sendPasswordReset(email.trim()) }
     }
 
+    /** Authenticated backend call: always sends a fresh, valid ID token. */
+    suspend fun call(action: String, params: Map<String, Any?> = emptyMap()): BackendResult {
+        val t = idToken()
+        return net { backend.call(action, t, params) }
+    }
+
     fun signOut() {
         tokens = null
         store.clear()

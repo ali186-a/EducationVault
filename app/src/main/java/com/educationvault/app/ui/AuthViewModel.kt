@@ -7,12 +7,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.educationvault.app.AppConfig
+import com.educationvault.app.AppContainer
 import com.educationvault.app.InputValidator
 import com.educationvault.app.R
 import com.educationvault.app.auth.AccessResult
 import com.educationvault.app.auth.AuthError
 import com.educationvault.app.auth.AuthException
-import com.educationvault.app.auth.AuthRepository
 import com.educationvault.app.net.BackendFailure
 import com.educationvault.app.net.MeInfo
 import kotlinx.coroutines.launch
@@ -23,7 +23,7 @@ sealed interface AuthUiState {
     data object SignedOut : AuthUiState
     data class NeedsVerification(val email: String) : AuthUiState
     data class NotInvited(val email: String) : AuthUiState
-    data class Ready(val me: MeInfo) : AuthUiState
+    data class Ready(val me: MeInfo, val session: Int) : AuthUiState
 }
 
 fun InputValidator.Problem.toRes(): Int = when (this) {
@@ -59,7 +59,8 @@ private fun backendErrorRes(code: String): Int = when (code) {
 }
 
 class AuthViewModel(app: Application) : AndroidViewModel(app) {
-    private val repo = AuthRepository(app)
+    private val repo = AppContainer.auth(app)
+    private var sessionCounter = 0
 
     var state by mutableStateOf<AuthUiState>(AuthUiState.Restoring)
         private set
@@ -110,7 +111,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             state = when (val r = repo.checkAccess()) {
                 is AccessResult.NeedsVerification -> AuthUiState.NeedsVerification(r.email)
                 is AccessResult.NotInvited -> AuthUiState.NotInvited(r.email)
-                is AccessResult.Ready -> AuthUiState.Ready(r.me)
+                is AccessResult.Ready -> AuthUiState.Ready(r.me, ++sessionCounter)
             }
         } catch (e: AuthException) {
             failWith(e.error.toRes(), e.error == AuthError.SESSION_EXPIRED)
@@ -222,6 +223,14 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                 errorRes = R.string.not_invited_still
             }
         }
+    }
+
+    /** Called by other screens when the backend says the login is no longer valid. */
+    fun onSessionExpired() {
+        repo.signOut()
+        state = AuthUiState.SignedOut
+        errorRes = R.string.err_session_expired
+        infoRes = null
     }
 
     fun signOut() {

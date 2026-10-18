@@ -47,7 +47,7 @@ import com.educationvault.app.R
 // ---------- building blocks ----------
 
 @Composable
-private fun ScreenFrame(content: @Composable ColumnScope.() -> Unit) {
+internal fun ScreenFrame(content: @Composable ColumnScope.() -> Unit) {
     Box(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
         Column(
             modifier = Modifier
@@ -63,7 +63,7 @@ private fun ScreenFrame(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-private fun Title(textRes: Int) {
+internal fun Title(textRes: Int) {
     Text(
         text = stringResource(textRes),
         style = MaterialTheme.typography.headlineMedium,
@@ -73,7 +73,7 @@ private fun Title(textRes: Int) {
 }
 
 @Composable
-private fun Messages(errorRes: Int?, infoRes: Int?) {
+internal fun Messages(errorRes: Int?, infoRes: Int?) {
     if (errorRes != null) {
         Text(
             text = stringResource(errorRes),
@@ -132,7 +132,7 @@ private fun PasswordField(
 }
 
 @Composable
-private fun BusyButton(textRes: Int, busy: Boolean, onClick: () -> Unit) {
+internal fun BusyButton(textRes: Int, busy: Boolean, onClick: () -> Unit) {
     Button(onClick = onClick, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
         if (busy) CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
         else Text(stringResource(textRes))
@@ -153,7 +153,7 @@ fun AppRoot(vm: AuthViewModel = viewModel()) {
         AuthUiState.SignedOut -> SignedOutFlow(vm)
         is AuthUiState.NeedsVerification -> VerifyScreen(vm, s.email)
         is AuthUiState.NotInvited -> NotInvitedScreen(vm, s.email)
-        is AuthUiState.Ready -> HomeScreen(vm, s)
+        is AuthUiState.Ready -> DocsRoot(vm, s.me, s.session)
     }
 }
 
@@ -284,18 +284,4 @@ private fun NotInvitedScreen(vm: AuthViewModel, email: String) = ScreenFrame {
     Spacer(Modifier.height(12.dp))
     BusyButton(R.string.retry_button, vm.busy) { vm.recheckInvitation() }
     TextButton(onClick = vm::signOut, enabled = !vm.busy) { Text(stringResource(R.string.logout_button)) }
-}
-
-@Composable
-private fun HomeScreen(vm: AuthViewModel, ready: AuthUiState.Ready) = ScreenFrame {
-    Title(R.string.home_title)
-    Text(stringResource(R.string.home_signed_in_as, ready.me.email))
-    if (ready.me.isAdmin) {
-        Spacer(Modifier.height(4.dp))
-        Text(stringResource(R.string.home_admin_badge), color = MaterialTheme.colorScheme.primary)
-    }
-    Spacer(Modifier.height(16.dp))
-    Text(stringResource(R.string.home_coming_soon), textAlign = TextAlign.Center)
-    Spacer(Modifier.height(24.dp))
-    OutlinedButton(onClick = vm::signOut) { Text(stringResource(R.string.logout_button)) }
 }
