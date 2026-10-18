@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">EducationVault</string>
     <string name="tagline">A safe vault for your education documents</string>
+
     <string name="config_missing_title">App configuration is incomplete</string>
     <string name="config_missing_body">Fix these values in app-config.properties, then rebuild the app:</string>
     <string name="ping_button">Check backend connection</string>
@@ -11,4 +12,57 @@
     <string name="ping_not_backend">This URL is not answering as the EducationVault backend. The deployment needs Who has access: Anyone.</string>
     <string name="ping_network_error">Network problem. Please try again.</string>
     <string name="version_label">Version %1$s (early test build)</string>
+
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="confirm_password_label">Confirm password</string>
+    <string name="show_password">Show</string>
+    <string name="hide_password">Hide</string>
+    <string name="retry_button">Try again</string>
+    <string name="restoring_session">Restoring your session…</string>
+    <string name="logout_button">Log out</string>
+    <string name="back_to_login">Back to log in</string>
+
+    <string name="login_title">Log in</string>
+    <string name="login_button">Log in</string>
+    <string name="register_link">Create a new account</string>
+    <string name="reset_link">Forgot password?</string>
+    <string name="register_title">New account</string>
+    <string name="register_note">Ask the app owner to invite your email address before you register, otherwise you will not be able to use the documents.</string>
+    <string name="register_button">Create account</string>
+    <string name="reset_title">Reset password</string>
+    <string name="reset_button">Send reset link</string>
+    <string name="reset_sent">If this email is registered, a password reset link has been sent. Check your inbox and spam folder.</string>
+
+    <string name="verify_title">Verify your email</string>
+    <string name="verify_body">We sent a verification email to %1$s. Open the link in that email, then come back here and press the button below. Check your spam folder if you cannot find it.</string>
+    <string name="verify_check_button">I have verified</string>
+    <string name="verify_resend_button">Resend email</string>
+    <string name="verify_resent">The verification email has been sent again.</string>
+    <string name="verify_still_not">Your email is not verified yet. Open the link and try again.</string>
+    <string name="not_invited_title">Access not allowed</string>
+    <string name="not_invited_body">The account %1$s has not been invited yet. Ask the app owner to add your email to the invitation list, then check again.</string>
+    <string name="not_invited_still">This email has not been invited yet.</string>
+
+    <string name="home_title">Welcome</string>
+    <string name="home_signed_in_as">Signed in: %1$s</string>
+    <string name="home_admin_badge">Admin</string>
+    <string name="home_coming_soon">The document screens will be added in the next step.</string>
+
+    <string name="err_email_empty">Enter your email.</string>
+    <string name="err_email_invalid">The email is not valid.</string>
+    <string name="err_password_empty">Enter your password.</string>
+    <string name="err_password_short">The password must be at least 8 characters.</string>
+    <string name="err_password_mismatch">The two passwords do not match.</string>
+    <string name="err_email_exists">An account with this email already exists. Please log in.</string>
+    <string name="err_invalid_credentials">Wrong email or password.</string>
+    <string name="err_user_disabled">This account has been disabled.</string>
+    <string name="err_too_many">Too many attempts. Please try again later.</string>
+    <string name="err_weak_password">The password is too weak. Use a longer one with mixed characters.</string>
+    <string name="err_session_expired">Your session has ended. Please log in again.</string>
+    <string name="err_network">Network problem. Check your connection and try again.</string>
+    <string name="err_server">The server is busy right now. Try again shortly.</string>
+    <string name="err_firebase_config">Firebase is not configured correctly. Contact the app owner.</string>
+    <string name="err_backend_not_configured">The backend is not fully configured. Tell the owner.</string>
+    <string name="err_unknown">Something went wrong. Please try again.</string>
 </resources>

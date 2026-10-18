@@ -2,6 +2,8 @@
 <resources>
     <string name="app_name">EducationVault</string>
     <string name="tagline">آپ کی تعلیمی دستاویزات کی محفوظ تجوری</string>
+
+    <!-- configuration / connection check -->
     <string name="config_missing_title">ایپ کی ترتیب مکمل نہیں</string>
     <string name="config_missing_body">فائل app-config.properties میں یہ قدریں درست کریں، پھر ایپ دوبارہ بنائیں:</string>
     <string name="ping_button">بیک اینڈ سے رابطہ جانچیں</string>
@@ -11,4 +13,62 @@
     <string name="ping_not_backend">یہ URL EducationVault بیک اینڈ کا جواب نہیں دے رہا۔ ڈپلائمنٹ میں Who has access: Anyone ہونا چاہیے۔</string>
     <string name="ping_network_error">انٹرنیٹ یا نیٹ ورک کا مسئلہ ہے۔ دوبارہ کوشش کریں۔</string>
     <string name="version_label">ورژن %1$s (ابتدائی ٹیسٹ ورژن)</string>
+
+    <!-- shared -->
+    <string name="email_label">ای میل</string>
+    <string name="password_label">پاس ورڈ</string>
+    <string name="confirm_password_label">پاس ورڈ دوبارہ لکھیں</string>
+    <string name="show_password">دکھائیں</string>
+    <string name="hide_password">چھپائیں</string>
+    <string name="retry_button">دوبارہ کوشش کریں</string>
+    <string name="restoring_session">سیشن بحال ہو رہا ہے…</string>
+    <string name="logout_button">لاگ آؤٹ</string>
+    <string name="back_to_login">لاگ ان پر واپس جائیں</string>
+
+    <!-- login / register / reset -->
+    <string name="login_title">لاگ ان</string>
+    <string name="login_button">لاگ ان کریں</string>
+    <string name="register_link">نیا اکاؤنٹ بنائیں</string>
+    <string name="reset_link">پاس ورڈ بھول گئے؟</string>
+    <string name="register_title">نیا اکاؤنٹ</string>
+    <string name="register_note">اکاؤنٹ بنانے سے پہلے ایپ کے مالک سے اپنی ای میل پر دعوت (invitation) لے لیں، ورنہ آپ دستاویزات استعمال نہیں کر سکیں گے۔</string>
+    <string name="register_button">اکاؤنٹ بنائیں</string>
+    <string name="reset_title">پاس ورڈ ری سیٹ</string>
+    <string name="reset_button">ری سیٹ لنک بھیجیں</string>
+    <string name="reset_sent">اگر یہ ای میل رجسٹرڈ ہے تو پاس ورڈ ری سیٹ کا لنک بھیج دیا گیا ہے۔ اپنا ان باکس اور سپیم فولڈر دیکھیں۔</string>
+
+    <!-- email verification / invitation -->
+    <string name="verify_title">ای میل کی تصدیق</string>
+    <string name="verify_body">ہم نے %1$s پر تصدیقی ای میل بھیجی ہے۔ ای میل میں دیا گیا لنک کھولیں، پھر یہاں واپس آ کر نیچے والا بٹن دبائیں۔ ای میل نہ ملے تو سپیم فولڈر بھی دیکھیں۔</string>
+    <string name="verify_check_button">میں نے تصدیق کر لی</string>
+    <string name="verify_resend_button">دوبارہ ای میل بھیجیں</string>
+    <string name="verify_resent">تصدیقی ای میل دوبارہ بھیج دی گئی ہے۔</string>
+    <string name="verify_still_not">ای میل کی تصدیق ابھی نہیں ہوئی۔ لنک کھولنے کے بعد دوبارہ کوشش کریں۔</string>
+    <string name="not_invited_title">رسائی کی اجازت نہیں</string>
+    <string name="not_invited_body">اکاؤنٹ %1$s کو ابھی دعوت نہیں ملی۔ ایپ کے مالک سے کہیں کہ آپ کی ای میل invitation لسٹ میں شامل کریں، پھر دوبارہ جانچیں۔</string>
+    <string name="not_invited_still">ابھی تک اس ای میل کو دعوت نہیں ملی۔</string>
+
+    <!-- home (placeholder until the document screens are added) -->
+    <string name="home_title">خوش آمدید</string>
+    <string name="home_signed_in_as">لاگ ان: %1$s</string>
+    <string name="home_admin_badge">ایڈمن</string>
+    <string name="home_coming_soon">دستاویزات کی اسکرینیں اگلے مرحلے میں شامل ہوں گی۔</string>
+
+    <!-- errors -->
+    <string name="err_email_empty">ای میل لکھیں۔</string>
+    <string name="err_email_invalid">ای میل درست نہیں۔</string>
+    <string name="err_password_empty">پاس ورڈ لکھیں۔</string>
+    <string name="err_password_short">پاس ورڈ کم از کم 8 حروف کا ہونا چاہیے۔</string>
+    <string name="err_password_mismatch">دونوں پاس ورڈ ایک جیسے نہیں۔</string>
+    <string name="err_email_exists">اس ای میل سے اکاؤنٹ پہلے سے موجود ہے۔ لاگ ان کریں۔</string>
+    <string name="err_invalid_credentials">ای میل یا پاس ورڈ غلط ہے۔</string>
+    <string name="err_user_disabled">یہ اکاؤنٹ بند کر دیا گیا ہے۔</string>
+    <string name="err_too_many">بہت زیادہ کوششیں ہو گئیں۔ کچھ دیر بعد دوبارہ کوشش کریں۔</string>
+    <string name="err_weak_password">پاس ورڈ کمزور ہے۔ لمبا اور مختلف حروف والا پاس ورڈ رکھیں۔</string>
+    <string name="err_session_expired">سیشن ختم ہو گیا۔ دوبارہ لاگ ان کریں۔</string>
+    <string name="err_network">انٹرنیٹ کا مسئلہ ہے۔ کنکشن چیک کر کے دوبارہ کوشش کریں۔</string>
+    <string name="err_server">سرور اس وقت مصروف ہے۔ کچھ دیر بعد کوشش کریں۔</string>
+    <string name="err_firebase_config">Firebase کی ترتیب درست نہیں۔ ایپ کے مالک سے رابطہ کریں۔</string>
+    <string name="err_backend_not_configured">بیک اینڈ کی ترتیب مکمل نہیں۔ مالک کو بتائیں۔</string>
+    <string name="err_unknown">کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔</string>
 </resources>
