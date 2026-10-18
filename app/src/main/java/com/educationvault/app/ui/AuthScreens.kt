@@ -1,6 +1,7 @@
 package com.educationvault.app.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -47,16 +48,18 @@ import com.educationvault.app.R
 
 @Composable
 private fun ScreenFrame(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        content = content
-    )
+    Box(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 24.dp, end = 24.dp, top = 64.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            content = content
+        )
+        LanguageSwitcher(Modifier.align(Alignment.TopEnd).padding(8.dp))
+    }
 }
 
 @Composable

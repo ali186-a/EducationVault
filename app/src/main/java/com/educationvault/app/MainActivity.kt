@@ -15,9 +15,9 @@ import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
-    // Urdu (right-to-left) is the default interface language.
+    // Urdu (right-to-left) is the default; the user can switch to English (left-to-right).
     override fun attachBaseContext(newBase: Context) {
-        val locale = Locale("ur")
+        val locale = Locale.forLanguageTag(LanguageStore.get(newBase))
         Locale.setDefault(locale)
         val config = Configuration(newBase.resources.configuration)
         config.setLocale(locale)
