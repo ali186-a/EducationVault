@@ -24,7 +24,8 @@ object FirebaseParser {
             msg == "WEAK_PASSWORD" -> AuthError.WEAK_PASSWORD
             msg == "INVALID_EMAIL" || msg == "MISSING_EMAIL" -> AuthError.INVALID_EMAIL
             msg in SESSION_ERRORS -> AuthError.SESSION_EXPIRED
-            full.contains("API key", ignoreCase = true) || msg == "OPERATION_NOT_ALLOWED" -> AuthError.CONFIG
+            full.contains("API key", ignoreCase = true) || msg == "OPERATION_NOT_ALLOWED" ||
+                msg.startsWith("INVALID_IDP_RESPONSE") -> AuthError.CONFIG
             httpCode >= 500 || httpCode == 429 -> AuthError.SERVER
             else -> AuthError.UNKNOWN
         }
@@ -53,6 +54,17 @@ object FirebaseParser {
             uid = o.getString("localId"),
             email = o.optString("email").trim().lowercase()
         )
+    }
+
+    /** Response of accounts:signInWithIdp (Google). "needConfirmation" means Firebase will not merge accounts silently. */
+    fun parseIdpSignIn(body: String, nowMillis: Long): AuthTokens {
+        val needs = try {
+            JSONObject(body).optBoolean("needConfirmation", false)
+        } catch (e: JSONException) {
+            false
+        }
+        if (needs) throw AuthException(AuthError.ACCOUNT_CONFLICT)
+        return parseSignIn(body, nowMillis)
     }
 
     /** Response of securetoken.googleapis.com/v1/token (it does not contain the email). */

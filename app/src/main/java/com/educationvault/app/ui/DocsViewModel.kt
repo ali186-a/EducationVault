@@ -10,12 +10,17 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.educationvault.app.AppContainer
+import com.educationvault.app.InputValidator
 import com.educationvault.app.R
+import com.educationvault.app.admin.AdminRepository
+import com.educationvault.app.admin.Invite
+import com.educationvault.app.admin.InviteValidator
 import com.educationvault.app.auth.AuthError
 import com.educationvault.app.auth.AuthException
 import com.educationvault.app.docs.Category
@@ -24,6 +29,7 @@ import com.educationvault.app.docs.DocsException
 import com.educationvault.app.docs.DocumentsRepository
 import com.educationvault.app.docs.FileSupport
 import com.educationvault.app.docs.FormValidator
+import com.educationvault.app.docs.ImageCompressor
 import com.educationvault.app.docs.NewDoc
 import com.educationvault.app.docs.PickResult
 import com.educationvault.app.docs.PickedFile
@@ -44,6 +50,9 @@ sealed interface Route {
     data object Upload : Route
     data class Detail(val docId: String) : Route
     data class Edit(val docId: String) : Route
+    data object Admin : Route
+    data object Settings : Route
+    data object Backup : Route
 }
 
 sealed interface Preview {
@@ -87,6 +96,8 @@ class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
     }
 
     private val repo = DocumentsRepository(AppContainer.auth(app))
+    private val adminRepo = AdminRepository(AppContainer.auth(app))
+    private val cameraDir = File(app.cacheDir, "camera")
     private val pdfFile = File(app.cacheDir, "ev_preview.pdf")
 
     /** Set by the UI: called when the login is no longer valid. */
@@ -153,6 +164,7 @@ class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
 
     override fun onCleared() {
         runCatching { pdfFile.delete() }
+        runCatching { cameraDir.deleteRecursively() }
     }
 
     // ----- categories -----
@@ -467,9 +479,159 @@ class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
         }
     }
 
+    // ----- camera -----
+    private var cameraFile: File? = null
+
+    /** A fresh private file the camera app may write into, or null if it cannot be created. */
+    fun newCameraUri(): Uri? = try {
+        val app = getApplication<Application>()
+        cameraDir.mkdirs()
+        val f = File(cameraDir, ImageCompressor.cameraFileName(System.currentTimeMillis()))
+        cameraFile = f
+        FileProvider.getUriForFile(app, app.packageName + ".fileprovider", f)
+    } catch (e: Exception) {
+        null
+    }
+
+    fun onCameraUnavailable() {
+        cameraFile?.delete()
+        cameraFile = null
+        infoRes = null
+        errorRes = R.string.err_no_camera
+    }
+
+    fun onCameraResult(taken: Boolean) {
+        val f = cameraFile
+        cameraFile = null
+        if (!taken) {
+            f?.delete()
+            return
+        }
+        if (f == null || !f.exists()) {
+            errorRes = R.string.err_file_read
+            return
+        }
+        launchBusy {
+            val bytes = withContext(Dispatchers.IO) {
+                val b = ImageCompressor.compressJpeg(f)
+                f.delete()
+                b
+            }
+            if (bytes == null || bytes.isEmpty()) {
+                errorRes = R.string.err_file_read
+            } else if (bytes.size > me.maxUploadBytes) {
+                errorRes = R.string.err_file_too_large
+            } else {
+                picked = PickedFile(f.name, "image/jpeg", bytes)
+            }
+        }
+    }
+
+    // ----- admin: invitations -----
+    var invites by mutableStateOf<List<Invite>>(emptyList())
+        private set
+    var invitesLoaded by mutableStateOf(false)
+        private set
+
+    fun openAdmin() {
+        if (!me.isAdmin) return
+        invitesLoaded = false
+        push(Route.Admin)
+        reloadInvites()
+    }
+
+    private fun adminErrorRes(e: Exception): Int {
+        if (e is DocsException) {
+            when (e.code) {
+                "NOT_FOUND" -> return R.string.err_invite_not_found
+                "BAD_REQUEST" -> return R.string.err_invite_bad
+                "LIMIT_REACHED" -> return R.string.err_invites_limit
+            }
+        }
+        return handle(e)
+    }
+
+    fun reloadInvites() {
+        launchBusy {
+            try {
+                invites = adminRepo.list()
+                invitesLoaded = true
+            } catch (e: AuthException) {
+                errorRes = adminErrorRes(e)
+            } catch (e: DocsException) {
+                errorRes = adminErrorRes(e)
+            }
+        }
+    }
+
+    fun invite(email: String) {
+        val problem = InputValidator.validateEmail(email)
+        if (problem != null) {
+            infoRes = null
+            errorRes = problem.toRes()
+            return
+        }
+        launchBusy {
+            try {
+                adminRepo.invite(email)
+                invites = adminRepo.list()
+                invitesLoaded = true
+                infoRes = R.string.invite_done
+            } catch (e: AuthException) {
+                errorRes = adminErrorRes(e)
+            } catch (e: DocsException) {
+                errorRes = adminErrorRes(e)
+            }
+        }
+    }
+
+    fun revoke(email: String) {
+        launchBusy {
+            try {
+                adminRepo.revoke(email)
+                invites = adminRepo.list()
+                infoRes = R.string.revoke_done
+            } catch (e: AuthException) {
+                errorRes = adminErrorRes(e)
+            } catch (e: DocsException) {
+                errorRes = adminErrorRes(e)
+            }
+        }
+    }
+
+    // ----- settings / backup info -----
+    var statsTotal by mutableStateOf<Int?>(null)
+        private set
+
+    fun openBackupInfo() {
+        statsTotal = null
+        push(Route.Backup)
+        viewModelScope.launch {
+            try {
+                statsTotal = repo.list(null, "", null, 1).total
+            } catch (e: AuthException) {
+                if (endsSession(e)) onSessionEnded?.invoke()
+            } catch (e: DocsException) {
+                if (endsSession(e)) onSessionEnded?.invoke()
+            }
+        }
+    }
+
+    fun sendPasswordResetToSelf() {
+        launchBusy {
+            try {
+                AppContainer.auth(getApplication<Application>()).sendPasswordReset(me.email)
+                infoRes = R.string.reset_sent
+            } catch (e: AuthException) {
+                errorRes = e.error.toRes()
+            }
+        }
+    }
+
     // Must stay the LAST member: it uses properties declared above.
     init {
         runCatching { pdfFile.delete() } // never leave an old decrypted copy behind
+        runCatching { cameraDir.deleteRecursively() }
         refreshCategories()
     }
 }

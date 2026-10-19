@@ -64,6 +64,10 @@ class AuthRepository(context: Context) {
         remember(net { firebase.signIn(email.trim(), password) })
     }
 
+    suspend fun signInWithGoogle(googleIdToken: String) {
+        remember(net { firebase.signInWithGoogle(googleIdToken) })
+    }
+
     suspend fun signUp(email: String, password: String) {
         remember(net { firebase.signUp(email.trim(), password) })
     }

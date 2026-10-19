@@ -13,6 +13,7 @@ import com.educationvault.app.R
 import com.educationvault.app.auth.AccessResult
 import com.educationvault.app.auth.AuthError
 import com.educationvault.app.auth.AuthException
+import com.educationvault.app.auth.GoogleResult
 import com.educationvault.app.net.BackendFailure
 import com.educationvault.app.net.MeInfo
 import kotlinx.coroutines.launch
@@ -45,6 +46,7 @@ fun AuthError.toRes(): Int = when (this) {
     AuthError.NETWORK -> R.string.err_network
     AuthError.SERVER -> R.string.err_server
     AuthError.CONFIG -> R.string.err_firebase_config
+    AuthError.ACCOUNT_CONFLICT -> R.string.err_account_conflict
     AuthError.UNKNOWN -> R.string.err_unknown
 }
 
@@ -70,6 +72,9 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var infoRes by mutableStateOf<Int?>(null)
         private set
+    /** Short technical hint for Google sign-in failures (helps diagnose setup problems). */
+    var errorDetail by mutableStateOf<String?>(null)
+        private set
 
     init {
         if (AppConfig.isConfigured) restore()
@@ -78,6 +83,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     fun clearMessages() {
         errorRes = null
         infoRes = null
+        errorDetail = null
     }
 
     /** One network action at a time: ignores extra taps while busy (no duplicate requests). */
@@ -150,6 +156,29 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                 evaluateAccess()
             } catch (e: AuthException) {
                 errorRes = e.error.toRes()
+            }
+        }
+    }
+
+    /**
+     * [fetch] shows the Google account chooser. The same button signs up new people and signs in
+     * returning ones; the invitation check (evaluateAccess) applies exactly as for email logins.
+     */
+    fun signInWithGoogle(fetch: suspend () -> GoogleResult) {
+        launchBusy {
+            when (val r = fetch()) {
+                is GoogleResult.Token -> try {
+                    repo.signInWithGoogle(r.idToken)
+                    evaluateAccess()
+                } catch (e: AuthException) {
+                    errorRes = e.error.toRes()
+                }
+                GoogleResult.Cancelled -> Unit
+                GoogleResult.Unavailable -> errorRes = R.string.err_google_unavailable
+                is GoogleResult.Failed -> {
+                    errorRes = R.string.err_google_failed
+                    errorDetail = r.detail
+                }
             }
         }
     }

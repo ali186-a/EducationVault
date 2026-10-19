@@ -26,6 +26,16 @@ class FirebaseAuthApi(private val apiKey: String) {
         return FirebaseParser.parseSignIn(accounts("signInWithPassword", body), System.currentTimeMillis())
     }
 
+    /** Exchanges a Google ID token (from the Google account chooser) for a Firebase login. */
+    suspend fun signInWithGoogle(googleIdToken: String): AuthTokens {
+        val body = JSONObject()
+            .put("postBody", "id_token=" + URLEncoder.encode(googleIdToken, "UTF-8") + "&providerId=google.com")
+            .put("requestUri", "http://localhost")
+            .put("returnIdpCredential", true)
+            .put("returnSecureToken", true)
+        return FirebaseParser.parseIdpSignIn(accounts("signInWithIdp", body), System.currentTimeMillis())
+    }
+
     suspend fun refresh(refreshToken: String, email: String): AuthTokens {
         val url = "https://securetoken.googleapis.com/v1/token?key=$key"
         val form = "grant_type=refresh_token&refresh_token=" + URLEncoder.encode(refreshToken, "UTF-8")

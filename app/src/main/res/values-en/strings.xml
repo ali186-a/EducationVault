@@ -141,4 +141,59 @@
     <string name="err_storage">There was a problem saving to Drive. Tell the owner.</string>
     <string name="err_preview_failed">The preview could not be opened. You can still save the file to your device.</string>
     <string name="err_save_failed">The file could not be saved.</string>
+
+    <!-- camera, admin, settings, backup info -->
+    <string name="action_camera">Take a photo with the camera</string>
+    <string name="err_no_camera">The camera app could not be opened. Choose a file to upload instead.</string>
+    <string name="action_admin">User invitations (admin)</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_backup">Backup &amp; storage information</string>
+    <string name="admin_title">User invitations</string>
+    <string name="admin_intro">Only invited emails can use the app. After inviting someone, ask them to create an account in the app with that same email and verify it.</string>
+    <string name="invite_email_label">Email</string>
+    <string name="invite_button">Invite</string>
+    <string name="invite_done">The invitation has been sent.</string>
+    <string name="invites_title">Invitations</string>
+    <string name="invites_empty">Nobody has been invited yet.</string>
+    <string name="invite_status_active">Active</string>
+    <string name="invite_status_revoked">Access removed</string>
+    <string name="invite_joined">Has logged in</string>
+    <string name="invite_not_joined">Not logged in yet</string>
+    <string name="revoke_button">Remove access</string>
+    <string name="reinvite_button">Invite again</string>
+    <string name="revoke_title">Remove access?</string>
+    <string name="revoke_body">%1$s will no longer be able to use the app. The files they saved earlier stay in Drive.</string>
+    <string name="revoke_confirm">Yes, remove</string>
+    <string name="revoke_done">Access has been removed.</string>
+    <string name="err_invite_not_found">No invitation was found for this email.</string>
+    <string name="err_invite_bad">This email cannot be invited (the owner is already included).</string>
+    <string name="err_invites_limit">The invitation limit has been reached.</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_role">Role: %1$s</string>
+    <string name="role_admin">Admin (owner)</string>
+    <string name="role_user">User</string>
+    <string name="settings_version">App version: %1$s</string>
+    <string name="settings_password">Send a password change email</string>
+    <string name="settings_password_hint">A link will arrive in your email. Use it to set a new password.</string>
+    <string name="backup_title">Backup &amp; storage</string>
+    <string name="backup_count">Your total documents: %1$s</string>
+    <string name="backup_where">Where your files are</string>
+    <string name="backup_where_body">All files are stored in the owner\'s own Google Drive inside the folder EducationVault. Each user has a separate folder, and inside the app one user cannot see another user\'s files.</string>
+    <string name="backup_trash">Deleted files</string>
+    <string name="backup_trash_body">A deleted file goes to the Drive Trash. The owner can open the Trash in Drive and restore it for about 30 days.</string>
+    <string name="backup_copy">Keeping your own copy</string>
+    <string name="backup_copy_body">Open a document and press \"Save to this device\". The owner can also download the whole EducationVault folder from Drive.</string>
+    <string name="backup_space">Space and cost</string>
+    <string name="backup_space_body">Files count against the owner\'s Drive space. A normal free account has 15 GB, shared with Gmail and Photos. The app itself charges nothing.</string>
+    <string name="backup_privacy">Privacy</string>
+    <string name="backup_privacy_body">Because the files are in the owner\'s Drive, the owner can see them there. Only invite people you trust.</string>
+
+    <!-- Google sign-in -->
+    <string name="google_button">Continue with Google</string>
+    <string name="or_divider">or</string>
+    <string name="err_google_failed">Google sign-in failed. Try again, or sign in with email and password.</string>
+    <string name="err_google_unavailable">No Google account was found. Add your Google account to the phone and keep Google Play Services updated.</string>
+    <string name="err_account_conflict">An account with this email already exists with another sign-in method. Sign in with email and password.</string>
 </resources>

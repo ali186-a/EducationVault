@@ -32,8 +32,24 @@ android {
         buildConfigField("String", "FIREBASE_API_KEY", quoted(cfg("FIREBASE_API_KEY")))
         buildConfigField("String", "FIREBASE_PROJECT_ID", quoted(cfg("FIREBASE_PROJECT_ID")))
         buildConfigField("String", "APPS_SCRIPT_URL", quoted(cfg("APPS_SCRIPT_URL")))
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", quoted(cfg("GOOGLE_WEB_CLIENT_ID")))
         val maxBytes = cfg("MAX_UPLOAD_BYTES").toLongOrNull() ?: 5242880L
         buildConfigField("long", "MAX_UPLOAD_BYTES", "${maxBytes}L")
+    }
+
+    // A fixed DEBUG signing key (app/debug.keystore, created once by the owner) keeps the app's SHA-1
+    // fingerprint the same on every GitHub build, which Google sign-in requires.
+    // DEBUG ONLY: never use this key for a release / Play Store build.
+    signingConfigs {
+        getByName("debug") {
+            val ks = file("debug.keystore")
+            if (ks.exists()) {
+                storeFile = ks
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
     }
 
     buildTypes {
@@ -72,6 +88,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")

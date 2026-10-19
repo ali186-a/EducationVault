@@ -4,7 +4,7 @@ import com.educationvault.app.net.MeInfo
 
 enum class AuthError {
     EMAIL_EXISTS, INVALID_CREDENTIALS, USER_DISABLED, TOO_MANY_ATTEMPTS, WEAK_PASSWORD,
-    INVALID_EMAIL, SESSION_EXPIRED, NETWORK, SERVER, CONFIG, UNKNOWN
+    INVALID_EMAIL, SESSION_EXPIRED, NETWORK, SERVER, CONFIG, ACCOUNT_CONFLICT, UNKNOWN
 }
 
 class AuthException(val error: AuthError) : Exception(error.name)

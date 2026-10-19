@@ -1,6 +1,8 @@
 # Secrets - never commit
 client_secret*.json
 *.keystore
+# Exception: the fixed DEBUG-only key used for Google sign-in (see app/build.gradle.kts)
+!app/debug.keystore
 *.jks
 google-services.json
 .env

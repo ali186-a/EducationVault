@@ -1,6 +1,7 @@
 package com.educationvault.app.ui
 
 import android.app.Application
+import android.content.ActivityNotFoundException
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -80,11 +81,14 @@ fun DocsRoot(authVm: AuthViewModel, me: MeInfo, session: Int) {
         Route.Upload -> UploadScreen(vm)
         is Route.Detail -> DetailScreen(vm, r.docId)
         is Route.Edit -> EditScreen(vm, r.docId)
+        Route.Admin -> AdminScreen(vm)
+        Route.Settings -> SettingsScreen(authVm, vm)
+        Route.Backup -> BackupScreen(vm)
     }
 }
 
 @Composable
-private fun DocsScaffold(titleRes: Int, vm: DocsViewModel, content: @Composable ColumnScope.() -> Unit) {
+internal fun DocsScaffold(titleRes: Int, vm: DocsViewModel, content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -124,6 +128,20 @@ private fun HomeScreen(authVm: AuthViewModel, vm: DocsViewModel) = ScreenFrame {
     Spacer(Modifier.height(8.dp))
     Button(onClick = { vm.openList(null) }, modifier = Modifier.fillMaxWidth()) {
         Text(stringResource(R.string.action_all_docs))
+    }
+    Spacer(Modifier.height(8.dp))
+    OutlinedButton(onClick = { vm.openBackupInfo() }, modifier = Modifier.fillMaxWidth()) {
+        Text(stringResource(R.string.action_backup))
+    }
+    if (vm.me.isAdmin) {
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(onClick = { vm.openAdmin() }, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.action_admin))
+        }
+    }
+    Spacer(Modifier.height(8.dp))
+    OutlinedButton(onClick = { vm.push(Route.Settings) }, modifier = Modifier.fillMaxWidth()) {
+        Text(stringResource(R.string.action_settings))
     }
     Spacer(Modifier.height(24.dp))
     OutlinedButton(onClick = { authVm.signOut() }) { Text(stringResource(R.string.logout_button)) }
@@ -314,7 +332,7 @@ private fun CategoryDropdown(
 }
 
 @Composable
-private fun TextInput(
+internal fun TextInput(
     value: String,
     onChange: (String) -> Unit,
     labelRes: Int,
@@ -349,6 +367,9 @@ private fun UploadScreen(vm: DocsViewModel) {
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         vm.onFilePicked(uri)
     }
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { taken ->
+        vm.onCameraResult(taken)
+    }
     LaunchedEffect(vm.picked) {
         val f = vm.picked
         if (f != null && title.isBlank()) title = Formatting.titleFromFileName(f.name)
@@ -368,6 +389,22 @@ private fun UploadScreen(vm: DocsViewModel) {
                 enabled = !vm.busy,
                 modifier = Modifier.fillMaxWidth()
             ) { Text(stringResource(R.string.pick_file_button)) }
+            OutlinedButton(
+                onClick = {
+                    val uri = vm.newCameraUri()
+                    if (uri == null) {
+                        vm.onCameraUnavailable()
+                    } else {
+                        try {
+                            camera.launch(uri)
+                        } catch (e: ActivityNotFoundException) {
+                            vm.onCameraUnavailable()
+                        }
+                    }
+                },
+                enabled = !vm.busy,
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(R.string.action_camera)) }
             val f = vm.picked
             Text(
                 if (f == null) stringResource(R.string.no_file)

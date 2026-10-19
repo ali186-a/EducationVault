@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.educationvault.app.AppConfig
 import com.educationvault.app.R
+import com.educationvault.app.auth.GoogleSignInHelper
 
 // ---------- building blocks ----------
 
@@ -221,8 +223,32 @@ private fun LoginScreen(
     Messages(vm.errorRes, vm.infoRes)
     Spacer(Modifier.height(8.dp))
     BusyButton(R.string.login_button, vm.busy) { vm.signIn(email, password) }
+    GoogleButton(vm)
     TextButton(onClick = onReset, enabled = !vm.busy) { Text(stringResource(R.string.reset_link)) }
     TextButton(onClick = onRegister, enabled = !vm.busy) { Text(stringResource(R.string.register_link)) }
+}
+
+@Composable
+private fun GoogleButton(vm: AuthViewModel) {
+    if (!AppConfig.isGoogleConfigured) return
+    val context = LocalContext.current
+    Spacer(Modifier.height(8.dp))
+    Text(
+        stringResource(R.string.or_divider),
+        style = MaterialTheme.typography.bodySmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth()
+    )
+    OutlinedButton(
+        onClick = {
+            vm.signInWithGoogle { GoogleSignInHelper.fetchIdToken(context, AppConfig.googleWebClientId) }
+        },
+        enabled = !vm.busy,
+        modifier = Modifier.fillMaxWidth()
+    ) { Text(stringResource(R.string.google_button)) }
+    vm.errorDetail?.let {
+        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+    }
 }
 
 @Composable
@@ -245,6 +271,7 @@ private fun RegisterScreen(
     Messages(vm.errorRes, vm.infoRes)
     Spacer(Modifier.height(8.dp))
     BusyButton(R.string.register_button, vm.busy) { vm.register(email, password, confirm) }
+    GoogleButton(vm)
     TextButton(onClick = onBack, enabled = !vm.busy) { Text(stringResource(R.string.back_to_login)) }
 }
 

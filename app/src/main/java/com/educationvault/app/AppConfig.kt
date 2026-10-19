@@ -18,6 +18,10 @@ object ConfigValidator {
         if (!isValidScriptUrl(scriptUrl)) add("APPS_SCRIPT_URL")
     }
 
+    /** A Google "Web client" ID looks like 123456-abc.apps.googleusercontent.com */
+    fun isValidGoogleClientId(id: String): Boolean =
+        isReal(id) && id.endsWith(".apps.googleusercontent.com") && id.length > 30
+
     fun isConfigured(apiKey: String, projectId: String, scriptUrl: String): Boolean =
         missing(apiKey, projectId, scriptUrl).isEmpty()
 }
@@ -31,6 +35,11 @@ object AppConfig {
     val firebaseProjectId: String = BuildConfig.FIREBASE_PROJECT_ID
     val appsScriptUrl: String = BuildConfig.APPS_SCRIPT_URL
     val maxUploadBytes: Long = BuildConfig.MAX_UPLOAD_BYTES
+    val googleWebClientId: String = BuildConfig.GOOGLE_WEB_CLIENT_ID
+
+    /** The Google button is shown only when a valid Web client ID is configured. */
+    val isGoogleConfigured: Boolean
+        get() = ConfigValidator.isValidGoogleClientId(googleWebClientId)
 
     val missingKeys: List<String>
         get() = ConfigValidator.missing(firebaseApiKey, firebaseProjectId, appsScriptUrl)
