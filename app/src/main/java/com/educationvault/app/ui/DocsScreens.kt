@@ -53,6 +53,28 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Surface
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import com.educationvault.app.docs.CategoryStyle
 import com.educationvault.app.LanguageStore
 import com.educationvault.app.R
 import com.educationvault.app.docs.Category
@@ -76,7 +98,6 @@ fun DocsRoot(authVm: AuthViewModel, me: MeInfo, session: Int) {
 
     when (val r = vm.route) {
         Route.Home -> HomeScreen(authVm, vm)
-        Route.Categories -> CategoriesScreen(vm)
         is Route.DocList -> DocListScreen(vm)
         Route.Upload -> UploadScreen(vm)
         is Route.Detail -> DetailScreen(vm, r.docId)
@@ -109,101 +130,221 @@ internal fun DocsScaffold(titleRes: Int, vm: DocsViewModel, content: @Composable
 // ---------- home ----------
 
 @Composable
-private fun HomeScreen(authVm: AuthViewModel, vm: DocsViewModel) = ScreenFrame {
-    Title(R.string.home_title)
-    Text(stringResource(R.string.home_signed_in_as, vm.me.email))
-    if (vm.me.isAdmin) {
-        Spacer(Modifier.height(4.dp))
-        Text(stringResource(R.string.home_admin_badge), color = MaterialTheme.colorScheme.primary)
-    }
-    Messages(vm.errorRes, vm.infoRes)
-    Spacer(Modifier.height(16.dp))
-    Button(onClick = { vm.openUpload() }, modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(R.string.action_upload))
-    }
-    Spacer(Modifier.height(8.dp))
-    Button(onClick = { vm.push(Route.Categories) }, modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(R.string.action_categories))
-    }
-    Spacer(Modifier.height(8.dp))
-    Button(onClick = { vm.openList(null) }, modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(R.string.action_all_docs))
-    }
-    Spacer(Modifier.height(8.dp))
-    OutlinedButton(onClick = { vm.openBackupInfo() }, modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(R.string.action_backup))
-    }
-    if (vm.me.isAdmin) {
-        Spacer(Modifier.height(8.dp))
-        OutlinedButton(onClick = { vm.openAdmin() }, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.action_admin))
-        }
-    }
-    Spacer(Modifier.height(8.dp))
-    OutlinedButton(onClick = { vm.push(Route.Settings) }, modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(R.string.action_settings))
-    }
-    Spacer(Modifier.height(24.dp))
-    OutlinedButton(onClick = { authVm.signOut() }) { Text(stringResource(R.string.logout_button)) }
-}
-
-// ---------- categories ----------
-
-@Composable
-private fun CategoriesScreen(vm: DocsViewModel) {
+private fun HomeScreen(authVm: AuthViewModel, vm: DocsViewModel) {
     val urdu = isUrdu()
     var showAdd by remember { mutableStateOf(false) }
-    var newName by rememberSaveable { mutableStateOf("") }
+    LaunchedEffect(Unit) { vm.refreshOverviewIfNeeded() }
 
-    DocsScaffold(R.string.categories_title, vm) {
-        LazyColumn(
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+    Box(Modifier.fillMaxSize().safeDrawingPadding()) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(vm.categories, key = { it.id }) { c ->
-                Card(onClick = { vm.openList(c.id) }, modifier = Modifier.fillMaxWidth()) {
-                    Text(c.label(urdu), modifier = Modifier.padding(16.dp))
+            item(span = { GridItemSpan(maxLineSpan) }) { HomeHeader(authVm, vm) }
+            item(span = { GridItemSpan(maxLineSpan) }) { HeroBanner(vm.totalDocs) }
+            item(span = { GridItemSpan(maxLineSpan) }) { HomeSearchBar { vm.openList(null, true) } }
+            if (vm.errorRes != null || vm.infoRes != null) {
+                item(span = { GridItemSpan(maxLineSpan) }) { Messages(vm.errorRes, vm.infoRes) }
+            }
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.categories_heading),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = { showAdd = true }, enabled = !vm.busy) {
+                        Text(stringResource(R.string.add_custom))
+                    }
                 }
             }
+            items(vm.categories, key = { it.id }) { c ->
+                CategoryCard(
+                    label = c.label(urdu),
+                    emoji = CategoryStyle.emojiFor(c.id),
+                    count = if (vm.totalDocs == null) null else (vm.counts[c.id] ?: 0)
+                ) { vm.openList(c.id) }
+            }
         }
-        Column(Modifier.padding(16.dp)) {
-            Messages(vm.errorRes, vm.infoRes)
-            OutlinedButton(
-                onClick = { showAdd = true },
-                enabled = !vm.busy,
-                modifier = Modifier.fillMaxWidth()
-            ) { Text(stringResource(R.string.add_category_button)) }
-        }
+        FloatingActionButton(
+            onClick = { vm.openUpload() },
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
+        ) { Text("+", fontSize = 30.sp, fontWeight = FontWeight.Light) }
     }
 
-    if (showAdd) {
-        AlertDialog(
-            onDismissRequest = { showAdd = false },
-            title = { Text(stringResource(R.string.add_category_title)) },
-            text = {
-                OutlinedTextField(
-                    value = newName,
-                    onValueChange = { newName = it },
-                    label = { Text(stringResource(R.string.category_name_label)) },
-                    singleLine = true
+    if (showAdd) AddCategoryDialog(vm) { showAdd = false }
+}
+
+@Composable
+private fun HomeHeader(authVm: AuthViewModel, vm: DocsViewModel) {
+    var menuOpen by remember { mutableStateOf(false) }
+    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) { Text("\uD83C\uDF93", fontSize = 20.sp) }
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.home_brand), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.home_cloud_secure), style = MaterialTheme.typography.bodySmall, color = Color(0xFF16A34A))
+        }
+        LanguagePill()
+        Spacer(Modifier.width(8.dp))
+        Box {
+            Box(
+                Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { menuOpen = true },
+                contentAlignment = Alignment.Center
+            ) { Text("\uD83D\uDC64", fontSize = 18.sp) }
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenuItem(text = { Text(vm.me.email) }, onClick = {}, enabled = false)
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_settings)) },
+                    onClick = { menuOpen = false; vm.push(Route.Settings) }
                 )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        vm.addCategory(newName)
-                        newName = ""
-                        showAdd = false
-                    },
-                    enabled = newName.isNotBlank()
-                ) { Text(stringResource(R.string.save_button)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showAdd = false }) { Text(stringResource(R.string.cancel_button)) }
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_backup)) },
+                    onClick = { menuOpen = false; vm.openBackupInfo() }
+                )
+                if (vm.me.isAdmin) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.action_admin)) },
+                        onClick = { menuOpen = false; vm.openAdmin() }
+                    )
+                }
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.logout_button), color = MaterialTheme.colorScheme.error) },
+                    onClick = { menuOpen = false; authVm.signOut() }
+                )
             }
-        )
+        }
     }
+}
+
+@Composable
+private fun HeroBanner(total: Int?) {
+    Box(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
+            .background(Brush.linearGradient(listOf(Color(0xFF2F54EB), Color(0xFF4338CA))))
+            .padding(20.dp)
+    ) {
+        Column(Modifier.align(Alignment.CenterStart).padding(end = 68.dp)) {
+            Text(stringResource(R.string.hero_kicker), fontSize = 12.sp, color = Color.White.copy(alpha = 0.85f))
+            Spacer(Modifier.height(6.dp))
+            Text(
+                if (total == null) stringResource(R.string.hero_loading) else stringResource(R.string.hero_title, total),
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(stringResource(R.string.hero_sub), fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
+        }
+        Box(
+            Modifier.align(Alignment.CenterEnd).size(52.dp).clip(RoundedCornerShape(14.dp))
+                .background(Color.White.copy(alpha = 0.18f)),
+            contentAlignment = Alignment.Center
+        ) { Text("\uD83D\uDEE1\uFE0F", fontSize = 26.sp) }
+    }
+}
+
+@Composable
+private fun HomeSearchBar(onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = Modifier.fillMaxWidth().height(48.dp)
+    ) {
+        Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("\uD83D\uDD0D", fontSize = 16.sp)
+            Spacer(Modifier.width(10.dp))
+            Text(stringResource(R.string.home_search_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun CategoryCard(label: String, emoji: String, count: Int?, onClick: () -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val has = (count ?: 0) > 0
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = scheme.surface,
+        border = BorderStroke(1.dp, scheme.outlineVariant),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(14.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                Box(
+                    Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(scheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) { Text(emoji, fontSize = 20.sp) }
+                Spacer(Modifier.weight(1f))
+                Box(
+                    Modifier.size(24.dp).clip(CircleShape).background(if (has) scheme.primaryContainer else scheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        count?.toString() ?: "\u2026",
+                        fontSize = 11.sp,
+                        color = if (has) scheme.primary else scheme.onSurfaceVariant
+                    )
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                minLines = 2,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(2.dp))
+            val c = count
+            Text(
+                if (c == null) "" else if (c == 1) stringResource(R.string.files_one) else stringResource(R.string.files_many, c),
+                style = MaterialTheme.typography.bodySmall,
+                color = scheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddCategoryDialog(vm: DocsViewModel, onDismiss: () -> Unit) {
+    var name by rememberSaveable { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.add_category_title)) },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(stringResource(R.string.category_name_label)) },
+                singleLine = true
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    vm.addCategory(name)
+                    onDismiss()
+                },
+                enabled = name.isNotBlank()
+            ) { Text(stringResource(R.string.save_button)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel_button)) } }
+    )
 }
 
 // ---------- document list + search ----------
@@ -211,6 +352,13 @@ private fun CategoriesScreen(vm: DocsViewModel) {
 @Composable
 private fun DocListScreen(vm: DocsViewModel) {
     val urdu = isUrdu()
+    val searchFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        if (vm.focusSearch) {
+            vm.consumeFocusSearch()
+            runCatching { searchFocus.requestFocus() }
+        }
+    }
     DocsScaffold(R.string.docs_title, vm) {
         Column(Modifier.padding(horizontal = 16.dp)) {
             OutlinedTextField(
@@ -218,7 +366,7 @@ private fun DocListScreen(vm: DocsViewModel) {
                 onValueChange = vm::onQueryChange,
                 label = { Text(stringResource(R.string.search_label)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().focusRequester(searchFocus)
             )
             val filter = vm.categoryFilter
             if (filter != null) {
@@ -281,18 +429,32 @@ private fun EmptyState(filtered: Boolean) {
 
 @Composable
 private fun DocCard(d: DocItem, categories: List<Category>, urdu: Boolean, onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp)) {
-            Text(d.title, style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(4.dp))
-            Text(
-                categoryLabel(d.category, categories, urdu) + " · " + Formatting.mimeLabel(d.mimeType) +
-                    " · " + Formatting.formatSize(d.size),
-                style = MaterialTheme.typography.bodySmall
-            )
-            val extra = listOfNotNull(d.institution.ifEmpty { null }, Formatting.dateOnly(d.createdAt).ifEmpty { null })
-            if (extra.isNotEmpty()) {
-                Text(extra.joinToString(" · "), style = MaterialTheme.typography.bodySmall)
+    val scheme = MaterialTheme.colorScheme
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = scheme.surface,
+        border = BorderStroke(1.dp, scheme.outlineVariant),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(scheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) { Text(CategoryStyle.emojiFor(d.category), fontSize = 22.sp) }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(d.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(
+                    categoryLabel(d.category, categories, urdu) + " \u00B7 " + Formatting.mimeLabel(d.mimeType) +
+                        " \u00B7 " + Formatting.formatSize(d.size),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurfaceVariant
+                )
+                val extra = listOfNotNull(d.institution.ifEmpty { null }, Formatting.dateOnly(d.createdAt).ifEmpty { null })
+                if (extra.isNotEmpty()) {
+                    Text(extra.joinToString(" \u00B7 "), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant)
+                }
             }
         }
     }

@@ -202,4 +202,17 @@
     <string name="err_google_failed">Google سے لاگ ان نہیں ہو سکا۔ دوبارہ کوشش کریں یا ای میل اور پاس ورڈ سے لاگ ان کریں۔</string>
     <string name="err_google_unavailable">کوئی Google اکاؤنٹ نہیں ملا۔ فون میں اپنا Google اکاؤنٹ شامل کریں اور Google Play Services اپ ڈیٹ رکھیں۔</string>
     <string name="err_account_conflict">اس ای میل کا اکاؤنٹ پہلے سے کسی اور طریقے سے بنا ہوا ہے۔ ای میل اور پاس ورڈ سے لاگ ان کریں۔</string>
+
+    <!-- new home -->
+    <string name="home_brand">Education Vault</string>
+    <string name="home_cloud_secure">● محفوظ کلاؤڈ</string>
+    <string name="hero_kicker">محفوظ کلاؤڈ اسٹوریج</string>
+    <string name="hero_title">%1$d دستاویزات محفوظ</string>
+    <string name="hero_loading">دستاویزات گنی جا رہی ہیں…</string>
+    <string name="hero_sub">آپ کے اپنے Google Drive میں</string>
+    <string name="home_search_hint">دستاویزات تلاش کریں…</string>
+    <string name="categories_heading">دستاویزات کے زمرے</string>
+    <string name="add_custom">+ نیا زمرہ</string>
+    <string name="files_one">1 فائل</string>
+    <string name="files_many">%1$d فائلیں</string>
 </resources>

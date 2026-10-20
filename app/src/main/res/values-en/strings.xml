@@ -196,4 +196,17 @@
     <string name="err_google_failed">Google sign-in failed. Try again, or sign in with email and password.</string>
     <string name="err_google_unavailable">No Google account was found. Add your Google account to the phone and keep Google Play Services updated.</string>
     <string name="err_account_conflict">An account with this email already exists with another sign-in method. Sign in with email and password.</string>
+
+    <!-- new home -->
+    <string name="home_brand">Education Vault</string>
+    <string name="home_cloud_secure">● Cloud Secure</string>
+    <string name="hero_kicker">Secure Cloud Storage</string>
+    <string name="hero_title">%1$d Documents Stored</string>
+    <string name="hero_loading">Counting documents…</string>
+    <string name="hero_sub">In your own Google Drive</string>
+    <string name="home_search_hint">Search documents…</string>
+    <string name="categories_heading">Document Categories</string>
+    <string name="add_custom">+ Add Custom</string>
+    <string name="files_one">1 file</string>
+    <string name="files_many">%1$d files</string>
 </resources>

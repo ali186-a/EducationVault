@@ -30,6 +30,18 @@ fun LanguageSwitcher(modifier: Modifier = Modifier) {
     }
 }
 
+/** Compact single button that shows the OTHER language (used in the home header). */
+@Composable
+fun LanguagePill(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val target = if (LanguageStore.get(context) == LanguageStore.URDU) LanguageStore.ENGLISH else LanguageStore.URDU
+    OutlinedButton(
+        onClick = { switchTo(context, target) },
+        modifier = modifier.height(36.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+    ) { Text(if (target == LanguageStore.URDU) "اردو" else "English") }
+}
+
 @Composable
 private fun LangButton(label: String, selected: Boolean, onClick: () -> Unit) {
     val padding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)

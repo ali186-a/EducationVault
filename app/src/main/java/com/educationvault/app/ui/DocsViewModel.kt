@@ -45,7 +45,6 @@ import kotlinx.coroutines.withContext
 
 sealed interface Route {
     data object Home : Route
-    data object Categories : Route
     data class DocList(val category: String?) : Route
     data object Upload : Route
     data class Detail(val docId: String) : Route
@@ -196,6 +195,53 @@ class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
         }
     }
 
+    // ----- home overview (file counts per category) -----
+    var counts by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+    var totalDocs by mutableStateOf<Int?>(null)
+        private set
+    private var overviewStale = true
+    private var overviewLoading = false
+    private var overviewVersion = 0
+
+    private fun markOverviewStale() {
+        overviewVersion++
+        overviewStale = true
+    }
+
+    /** Counts documents per category by reading the list once (no backend change needed). */
+    fun refreshOverviewIfNeeded() {
+        if (!overviewStale || overviewLoading) return
+        overviewLoading = true
+        val version = overviewVersion
+        viewModelScope.launch {
+            try {
+                val map = mutableMapOf<String, Int>()
+                var total = 0
+                var cursor: String? = null
+                var pages = 0
+                do {
+                    val page = repo.list(null, "", cursor, 100)
+                    for (d in page.items) map[d.category] = (map[d.category] ?: 0) + 1
+                    total += page.items.size
+                    cursor = page.nextCursor
+                    pages++
+                } while (cursor != null && pages < 10)
+                counts = map
+                totalDocs = total
+                if (version == overviewVersion) overviewStale = false
+            } catch (e: AuthException) {
+                if (endsSession(e)) onSessionEnded?.invoke()
+            } catch (e: DocsException) {
+                if (endsSession(e)) onSessionEnded?.invoke()
+            } finally {
+                overviewLoading = false
+                // something changed while we were counting: count again
+                if (overviewStale && version != overviewVersion) refreshOverviewIfNeeded()
+            }
+        }
+    }
+
     // ----- document list -----
     val items = mutableStateListOf<DocItem>()
     var nextCursor by mutableStateOf<String?>(null)
@@ -216,7 +262,15 @@ class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
     private var listToken = 0
     private var searchJob: Job? = null
 
-    fun openList(category: String?) {
+    /** Set when the list is opened from the home search bar, so the keyboard opens at once. */
+    var focusSearch = false
+
+    fun consumeFocusSearch() {
+        focusSearch = false
+    }
+
+    fun openList(category: String?, focusSearch: Boolean = false) {
+        this.focusSearch = focusSearch
         categoryFilter = category
         query = ""
         listLoaded = false
@@ -336,6 +390,7 @@ class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
                 )
                 picked = null
                 listLoaded = false
+                markOverviewStale()
                 pop()
                 infoRes = R.string.upload_done
             } catch (e: AuthException) {
@@ -453,6 +508,7 @@ class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
                 detailDoc = doc
                 val i = items.indexOfFirst { it.id == doc.id }
                 if (i >= 0) items[i] = doc
+                markOverviewStale()
                 pop()
                 infoRes = R.string.edit_done
             } catch (e: AuthException) {
@@ -469,6 +525,7 @@ class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
                 repo.delete(docId)
                 items.removeAll { it.id == docId }
                 total = (total - 1).coerceAtLeast(0)
+                markOverviewStale()
                 pop()
                 infoRes = R.string.deleted_done
             } catch (e: AuthException) {
