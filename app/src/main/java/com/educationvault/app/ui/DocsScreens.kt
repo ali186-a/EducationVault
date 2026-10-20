@@ -102,7 +102,6 @@ fun DocsRoot(authVm: AuthViewModel, me: MeInfo, session: Int) {
         Route.Upload -> UploadScreen(vm)
         is Route.Detail -> DetailScreen(vm, r.docId)
         is Route.Edit -> EditScreen(vm, r.docId)
-        Route.Admin -> AdminScreen(vm)
         Route.Settings -> SettingsScreen(authVm, vm)
         Route.Backup -> BackupScreen(vm)
     }
@@ -192,7 +191,6 @@ private fun HomeHeader(authVm: AuthViewModel, vm: DocsViewModel) {
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Text(stringResource(R.string.home_brand), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(stringResource(R.string.home_cloud_secure), style = MaterialTheme.typography.bodySmall, color = Color(0xFF16A34A))
         }
         LanguagePill()
         Spacer(Modifier.width(8.dp))
@@ -212,12 +210,6 @@ private fun HomeHeader(authVm: AuthViewModel, vm: DocsViewModel) {
                     text = { Text(stringResource(R.string.action_backup)) },
                     onClick = { menuOpen = false; vm.openBackupInfo() }
                 )
-                if (vm.me.isAdmin) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.action_admin)) },
-                        onClick = { menuOpen = false; vm.openAdmin() }
-                    )
-                }
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.logout_button), color = MaterialTheme.colorScheme.error) },
                     onClick = { menuOpen = false; authVm.signOut() }
@@ -235,16 +227,12 @@ private fun HeroBanner(total: Int?) {
             .padding(20.dp)
     ) {
         Column(Modifier.align(Alignment.CenterStart).padding(end = 68.dp)) {
-            Text(stringResource(R.string.hero_kicker), fontSize = 12.sp, color = Color.White.copy(alpha = 0.85f))
-            Spacer(Modifier.height(6.dp))
             Text(
                 if (total == null) stringResource(R.string.hero_loading) else stringResource(R.string.hero_title, total),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
-            Spacer(Modifier.height(6.dp))
-            Text(stringResource(R.string.hero_sub), fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
         }
         Box(
             Modifier.align(Alignment.CenterEnd).size(52.dp).clip(RoundedCornerShape(14.dp))

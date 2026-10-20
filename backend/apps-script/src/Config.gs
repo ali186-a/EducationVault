@@ -3,6 +3,8 @@
  *   FIREBASE_API_KEY, FIREBASE_PROJECT_ID, ADMIN_EMAIL   (required)
  *   MAX_UPLOAD_BYTES (optional, default 5242880, hard cap 10485760)
  *   REQUIRE_EMAIL_VERIFIED (optional, default "true")
+ *   REQUIRE_INVITE (optional, default "false": anyone with a verified account may use the app;
+ *                   "true" brings back the invitation/allowlist system)
  *   ROOT_FOLDER_ID (written automatically on first use)
  */
 const ROOT_FOLDER_NAME_ = 'EducationVault';
@@ -35,7 +37,7 @@ const LIMITS = {
   notesMax: 1000,
   nameMax: 100,
   categoryNameMax: 40,
-  maxDocsPerUser: 500,
+  maxDocsPerUser: 100,
   maxInvites: 20,
   maxCustomCategories: 20,
   listDefault: 30,
@@ -55,7 +57,8 @@ function getConfig_() {
   if (!(max > 0)) max = LIMITS.defaultUploadBytes;
   if (max > LIMITS.hardUploadBytes) max = LIMITS.hardUploadBytes;
   const requireVerified = (p.getProperty('REQUIRE_EMAIL_VERIFIED') || 'true').trim().toLowerCase() !== 'false';
-  return { apiKey: apiKey, projectId: projectId, adminEmail: adminEmail, maxUploadBytes: max, requireEmailVerified: requireVerified };
+  const requireInvite = (p.getProperty('REQUIRE_INVITE') || 'false').trim().toLowerCase() === 'true';
+  return { apiKey: apiKey, projectId: projectId, adminEmail: adminEmail, maxUploadBytes: max, requireEmailVerified: requireVerified, requireInvite: requireInvite };
 }
 
 function isConfigured_() {

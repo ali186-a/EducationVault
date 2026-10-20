@@ -21,7 +21,8 @@ function fail(res, code) {
 const plain = (x) => JSON.parse(JSON.stringify(x));
 
 function setup(options) {
-  const env = createEnv(options);
+  // These tests cover the invitation system, which is an opt-in mode (REQUIRE_INVITE=true).
+  const env = createEnv(Object.assign({}, options, { props: Object.assign({ REQUIRE_INVITE: 'true' }, (options || {}).props) }));
   const admin = env.addUser({ uid: 'adminUid001', email: 'Owner@Example.com' });
   const alice = env.addUser({ uid: 'aliceUid001', email: 'alice@example.com' });
   const bob = env.addUser({ uid: 'bobUid000002', email: 'bob@example.com' });
@@ -421,4 +422,47 @@ test('logs never contain tokens, API key, passwords or file contents', () => {
   for (const secret of [alice, admin, 'test-api-key', PDF.toString('base64'), t]) {
     assert.ok(!all.includes(secret), 'secret found in logs');
   }
+});
+
+// ---------- open registration (the default: no invitation needed) ----------
+test('open registration: any verified account can use the app without an invitation', () => {
+  const env = createEnv();
+  const carol = env.addUser({ uid: 'carolUid0004', email: 'carol@example.com' });
+  const me = ok(env.callAs(carol, 'me'));
+  assert.equal(me.email, 'carol@example.com');
+  assert.equal(me.isAdmin, false);
+  const doc = ok(env.callAs(carol, 'upload', up(PDF))).doc;
+  assert.equal(ok(env.callAs(carol, 'listDocs')).items.length, 1);
+  assert.equal(ok(env.callAs(carol, 'download', { docId: doc.id })).doc.id, doc.id);
+});
+
+test('open registration: users still cannot see or touch each other\'s documents', () => {
+  const env = createEnv();
+  const carol = env.addUser({ uid: 'carolUid0004', email: 'carol@example.com' });
+  const dave = env.addUser({ uid: 'daveUid00005', email: 'dave@example.com' });
+  const doc = ok(env.callAs(carol, 'upload', up(PDF))).doc;
+  assert.equal(ok(env.callAs(dave, 'listDocs')).items.length, 0);
+  fail(env.callAs(dave, 'download', { docId: doc.id }), 'NOT_FOUND');
+  fail(env.callAs(dave, 'deleteDoc', { docId: doc.id }), 'NOT_FOUND');
+  assert.equal(ok(env.callAs(carol, 'listDocs')).items.length, 1);
+});
+
+test('open registration: an unverified email is still rejected', () => {
+  const env = createEnv();
+  const mallory = env.addUser({ uid: 'malloryUid06', email: 'mallory@example.com', emailVerified: false });
+  fail(env.callAs(mallory, 'listDocs'), 'EMAIL_NOT_VERIFIED');
+  fail(env.callAs(mallory, 'upload', up(PDF)), 'EMAIL_NOT_VERIFIED');
+});
+
+test('open registration: forged or missing tokens are still rejected', () => {
+  const env = createEnv();
+  fail(env.callAs('not-a-real-token-at-all-0123456789', 'listDocs'), 'UNAUTHENTICATED');
+  fail(env.call({ action: 'listDocs' }), 'UNAUTHENTICATED');
+});
+
+test('open registration: the per-user document limit still applies', () => {
+  const env = createEnv();
+  const carol = env.addUser({ uid: 'carolUid0004', email: 'carol@example.com' });
+  for (let i = 0; i < 100; i++) ok(env.callAs(carol, 'upload', up(PDF, null, { title: 'Doc ' + i })));
+  fail(env.callAs(carol, 'upload', up(PDF)), 'LIMIT_REACHED');
 });

@@ -174,7 +174,10 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                     errorRes = e.error.toRes()
                 }
                 GoogleResult.Cancelled -> Unit
-                GoogleResult.Unavailable -> errorRes = R.string.err_google_unavailable
+                is GoogleResult.Unavailable -> {
+                    errorRes = R.string.err_google_unavailable
+                    errorDetail = r.detail
+                }
                 is GoogleResult.Failed -> {
                     errorRes = R.string.err_google_failed
                     errorDetail = r.detail

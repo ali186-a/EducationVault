@@ -10,11 +10,12 @@ import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import kotlin.coroutines.cancellation.CancellationException
 
 sealed interface GoogleResult {
     data class Token(val idToken: String) : GoogleResult
     data object Cancelled : GoogleResult
-    data object Unavailable : GoogleResult
+    data class Unavailable(val detail: String) : GoogleResult
     data class Failed(val detail: String) : GoogleResult
 }
 
@@ -35,15 +36,22 @@ object GoogleSignInHelper {
         } catch (e: GetCredentialCancellationException) {
             GoogleResult.Cancelled
         } catch (e: NoCredentialException) {
-            GoogleResult.Unavailable
+            GoogleResult.Unavailable(describe(context, e))
         } catch (e: GetCredentialException) {
-            GoogleResult.Failed(describe(e))
+            GoogleResult.Failed(describe(context, e))
         } catch (e: GoogleIdTokenParsingException) {
-            GoogleResult.Failed(describe(e))
+            GoogleResult.Failed(describe(context, e))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Never let an unexpected error crash the app; show it instead.
+            GoogleResult.Failed(describe(context, e))
         }
     }
 
-    /** Short technical hint shown under the error so a problem can be diagnosed from a screenshot. */
-    private fun describe(e: Exception): String =
-        (e.javaClass.simpleName + ": " + (e.message ?: "")).take(160)
+    /** Technical hint shown under the error so a problem can be diagnosed from a screenshot. */
+    private fun describe(context: Context, e: Exception): String =
+        (e.javaClass.simpleName + ": " + (e.message ?: "")).take(160) +
+            "\npackage: " + context.packageName +
+            "\nSHA-1: " + (AppSignature.sha1(context) ?: "?")
 }

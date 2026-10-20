@@ -119,7 +119,7 @@
     <string name="edit_done">تبدیلیاں محفوظ ہو گئیں۔</string>
     <string name="delete_button">حذف کریں</string>
     <string name="delete_title">دستاویز حذف کریں؟</string>
-    <string name="delete_body">دستاویز %1$s حذف ہو جائے گی۔ فائل Google Drive کے Trash میں جائے گی اور مالک تقریباً 30 دن تک اسے بحال کر سکتا ہے۔</string>
+    <string name="delete_body">دستاویز %1$s حذف ہو جائے گی۔ فائل Trash میں جائے گی اور تقریباً 30 دن بعد مستقل طور پر ختم ہو جائے گی۔</string>
     <string name="delete_confirm">ہاں، حذف کریں</string>
     <string name="deleted_done">دستاویز حذف ہو گئی۔</string>
     <string name="meta_line">%1$s: %2$s</string>
@@ -144,57 +144,33 @@
     <string name="err_doc_not_found">دستاویز نہیں ملی۔</string>
     <string name="err_limit_reached">مقررہ حد پوری ہو گئی ہے۔</string>
     <string name="err_bad_request">درج کی گئی معلومات درست نہیں۔</string>
-    <string name="err_storage">Drive میں محفوظ کرنے میں مسئلہ ہوا۔ مالک کو بتائیں۔</string>
+    <string name="err_storage">فائل محفوظ کرنے میں مسئلہ ہوا۔ تھوڑی دیر بعد دوبارہ کوشش کریں۔</string>
     <string name="err_preview_failed">پیش نظارہ نہیں کھل سکا۔ آپ فائل ڈیوائس میں محفوظ کر سکتے ہیں۔</string>
     <string name="err_save_failed">فائل محفوظ نہیں ہو سکی۔</string>
 
     <!-- camera, admin, settings, backup info -->
     <string name="action_camera">کیمرے سے تصویر لیں</string>
     <string name="err_no_camera">کیمرہ ایپ نہیں کھل سکی۔ فائل چن کر اپ لوڈ کریں۔</string>
-    <string name="action_admin">صارفین کی دعوتیں (ایڈمن)</string>
     <string name="action_settings">سیٹنگز</string>
     <string name="action_backup">بیک اپ اور اسٹوریج کی معلومات</string>
-    <string name="admin_title">صارفین کی دعوتیں</string>
-    <string name="admin_intro">صرف دعوت پانے والے ای میل ایپ استعمال کر سکتے ہیں۔ دعوت دینے کے بعد اس شخص سے کہیں کہ ایپ میں اسی ای میل سے اکاؤنٹ بنائے اور ای میل کی تصدیق کرے۔</string>
-    <string name="invite_email_label">ای میل</string>
-    <string name="invite_button">دعوت دیں</string>
-    <string name="invite_done">دعوت دے دی گئی۔</string>
-    <string name="invites_title">دی گئی دعوتیں</string>
-    <string name="invites_empty">ابھی کسی کو دعوت نہیں دی گئی۔</string>
-    <string name="invite_status_active">فعال</string>
-    <string name="invite_status_revoked">رسائی ختم</string>
-    <string name="invite_joined">لاگ ان ہو چکا</string>
-    <string name="invite_not_joined">ابھی لاگ ان نہیں کیا</string>
-    <string name="revoke_button">رسائی ختم کریں</string>
-    <string name="reinvite_button">دوبارہ دعوت دیں</string>
-    <string name="revoke_title">رسائی ختم کریں؟</string>
-    <string name="revoke_body">%1$s ایپ استعمال نہیں کر سکے گا۔ اس کی پہلے محفوظ کی ہوئی فائلیں Drive میں رہیں گی۔</string>
-    <string name="revoke_confirm">ہاں، ختم کریں</string>
-    <string name="revoke_done">رسائی ختم کر دی گئی۔</string>
-    <string name="err_invite_not_found">اس ای میل کی دعوت نہیں ملی۔</string>
-    <string name="err_invite_bad">اس ای میل کو دعوت نہیں دی جا سکتی (مالک پہلے ہی شامل ہے)۔</string>
-    <string name="err_invites_limit">دعوتوں کی حد پوری ہو گئی ہے۔</string>
     <string name="settings_title">سیٹنگز</string>
     <string name="settings_language">زبان</string>
     <string name="settings_account">اکاؤنٹ</string>
-    <string name="settings_role">کردار: %1$s</string>
-    <string name="role_admin">ایڈمن (مالک)</string>
-    <string name="role_user">صارف</string>
     <string name="settings_version">ایپ ورژن: %1$s</string>
     <string name="settings_password">پاس ورڈ بدلنے کا ای میل بھیجیں</string>
     <string name="settings_password_hint">آپ کے ای میل پر ایک لنک آئے گا۔ اس سے نیا پاس ورڈ بنائیں۔</string>
     <string name="backup_title">بیک اپ اور اسٹوریج</string>
     <string name="backup_count">آپ کی کل دستاویزات: %1$s</string>
     <string name="backup_where">آپ کی فائلیں کہاں ہیں</string>
-    <string name="backup_where_body">تمام فائلیں مالک کے اپنے Google Drive میں فولڈر EducationVault کے اندر محفوظ ہیں۔ ہر صارف کا الگ فولڈر ہے اور ایپ میں ایک صارف دوسرے کی فائلیں نہیں دیکھ سکتا۔</string>
+    <string name="backup_where_body">تمام فائلیں ایپ کے مالک کے Google Drive میں ایک الگ فولڈر میں محفوظ ہوتی ہیں۔ ہر صارف کا اپنا فولڈر ہے اور ایپ میں ایک صارف دوسرے کی فائلیں نہیں دیکھ سکتا۔</string>
     <string name="backup_trash">حذف شدہ فائلیں</string>
-    <string name="backup_trash_body">حذف کی ہوئی فائل Drive کے Trash میں جاتی ہے۔ مالک Drive میں Trash کھول کر تقریباً 30 دن تک اسے بحال کر سکتا ہے۔</string>
+    <string name="backup_trash_body">حذف کی ہوئی فائل Drive کے Trash میں جاتی ہے اور تقریباً 30 دن بعد مستقل طور پر ختم ہو جاتی ہے۔ بحالی کے لیے ایپ کے مالک سے رابطہ کریں۔</string>
     <string name="backup_copy">اپنی کاپی کیسے رکھیں</string>
-    <string name="backup_copy_body">دستاویز کھول کر \"ڈیوائس میں محفوظ کریں\" دبائیں۔ مالک پورا EducationVault فولڈر Drive سے ڈاؤن لوڈ بھی کر سکتا ہے۔</string>
+    <string name="backup_copy_body">دستاویز کھول کر \"ڈیوائس میں محفوظ کریں\" دبائیں تاکہ آپ کے پاس اپنی کاپی رہے۔</string>
     <string name="backup_space">جگہ اور خرچ</string>
-    <string name="backup_space_body">فائلیں مالک کے Drive کی جگہ میں گنی جاتی ہیں۔ عام مفت اکاؤنٹ میں 15 GB ملتے ہیں، جو Gmail اور Photos کے ساتھ مشترک ہیں۔ ایپ خود کوئی فیس نہیں لیتی۔</string>
+    <string name="backup_space_body">فائلیں ایپ کے مالک کے Drive کی جگہ میں گنی جاتی ہیں، اس لیے ہر صارف کے لیے دستاویزات کی حد مقرر ہے۔ ایپ خود کوئی فیس نہیں لیتی۔</string>
     <string name="backup_privacy">رازداری</string>
-    <string name="backup_privacy_body">چونکہ فائلیں مالک کے Drive میں ہیں، مالک اپنے Drive میں انہیں دیکھ سکتا ہے۔ صرف ایسے لوگوں کو دعوت دیں جن پر آپ کو بھروسا ہو۔</string>
+    <string name="backup_privacy_body">چونکہ فائلیں ایپ کے مالک کے Drive میں رکھی جاتی ہیں، مالک انہیں اپنے Drive میں دیکھ سکتا ہے۔ ایسی دستاویزات اپ لوڈ نہ کریں جو آپ مالک سے چھپانا چاہتے ہوں۔</string>
 
     <!-- Google sign-in -->
     <string name="google_button">Google اکاؤنٹ سے جاری رکھیں</string>
@@ -205,11 +181,8 @@
 
     <!-- new home -->
     <string name="home_brand">Education Vault</string>
-    <string name="home_cloud_secure">● محفوظ کلاؤڈ</string>
-    <string name="hero_kicker">محفوظ کلاؤڈ اسٹوریج</string>
     <string name="hero_title">%1$d دستاویزات محفوظ</string>
     <string name="hero_loading">دستاویزات گنی جا رہی ہیں…</string>
-    <string name="hero_sub">آپ کے اپنے Google Drive میں</string>
     <string name="home_search_hint">دستاویزات تلاش کریں…</string>
     <string name="categories_heading">دستاویزات کے زمرے</string>
     <string name="add_custom">+ نیا زمرہ</string>

@@ -84,6 +84,12 @@ function authorize_(idToken, cfg) {
     throw new AppError('EMAIL_NOT_VERIFIED', 'Please verify your email address first');
   }
 
+  // Open registration (default): every account with a verified email may use the app.
+  // Each user still only ever reaches their own folder (see Storage.gs ownership checks).
+  if (!cfg.requireInvite) {
+    return { uid: id.uid, email: id.email, emailVerified: id.emailVerified, isAdmin: false };
+  }
+
   const root = getRootFolder_();
   const invites = loadAllowlist_(root).data.invites;
   const entry = hasOwn_(invites, id.email) ? invites[id.email] : null;
