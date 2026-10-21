@@ -154,7 +154,7 @@
     <string name="settings_password_hint">A link will arrive in your email. Use it to set a new password.</string>
 
     <!-- Google sign-in -->
-    <string name="google_button">Continue with Google</string>
+    <string name="google_button">Sign in with Google</string>
     <string name="or_divider">or</string>
     <string name="err_google_failed">Google sign-in failed. Try again, or sign in with email and password.</string>
     <string name="err_google_unavailable">No Google account was found. Add your Google account to the phone and keep Google Play Services updated.</string>
@@ -170,4 +170,13 @@
     <string name="files_one">1 file</string>
     <string name="files_many">%1$d files</string>
     <string name="home_welcome">Welcome, %1$s</string>
+    <string name="name_label">Your name</string>
+    <string name="name_save">Save name</string>
+    <string name="name_saved">Your name has been changed.</string>
+    <string name="err_name_invalid">The name must be 1 to 50 characters.</string>
+    <string name="avatar_change">Change picture</string>
+    <string name="avatar_remove">Remove picture</string>
+    <string name="avatar_saved">Your profile picture has been saved.</string>
+    <string name="avatar_removed">Your profile picture has been removed.</string>
+    <string name="err_avatar_invalid">The picture could not be opened. Choose another one.</string>
 </resources>

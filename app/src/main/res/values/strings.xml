@@ -160,7 +160,7 @@
     <string name="settings_password_hint">آپ کے ای میل پر ایک لنک آئے گا۔ اس سے نیا پاس ورڈ بنائیں۔</string>
 
     <!-- Google sign-in -->
-    <string name="google_button">Google اکاؤنٹ سے جاری رکھیں</string>
+    <string name="google_button">Google سے سائن اِن کریں</string>
     <string name="or_divider">یا</string>
     <string name="err_google_failed">Google سے لاگ ان نہیں ہو سکا۔ دوبارہ کوشش کریں یا ای میل اور پاس ورڈ سے لاگ ان کریں۔</string>
     <string name="err_google_unavailable">کوئی Google اکاؤنٹ نہیں ملا۔ فون میں اپنا Google اکاؤنٹ شامل کریں اور Google Play Services اپ ڈیٹ رکھیں۔</string>
@@ -176,4 +176,13 @@
     <string name="files_one">1 فائل</string>
     <string name="files_many">%1$d فائلیں</string>
     <string name="home_welcome">خوش آمدید، %1$s</string>
+    <string name="name_label">آپ کا نام</string>
+    <string name="name_save">نام محفوظ کریں</string>
+    <string name="name_saved">نام تبدیل ہو گیا۔</string>
+    <string name="err_name_invalid">نام 1 سے 50 حروف کا ہونا چاہیے۔</string>
+    <string name="avatar_change">تصویر بدلیں</string>
+    <string name="avatar_remove">تصویر ہٹائیں</string>
+    <string name="avatar_saved">پروفائل تصویر محفوظ ہو گئی۔</string>
+    <string name="avatar_removed">پروفائل تصویر ہٹا دی گئی۔</string>
+    <string name="err_avatar_invalid">تصویر کھل نہیں سکی۔ کوئی دوسری تصویر چنیں۔</string>
 </resources>

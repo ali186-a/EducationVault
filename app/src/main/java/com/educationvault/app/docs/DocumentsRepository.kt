@@ -87,6 +87,28 @@ class DocumentsRepository(private val auth: AuthRepository) {
         return parsed { DocParser.parseDoc(data.getJSONObject("doc")) }
     }
 
+    /** The person's own profile picture (small JPEG), or null if none was saved. */
+    suspend fun getAvatar(): ByteArray? {
+        val data = call("getAvatar")
+        if (data.isNull("contentBase64")) return null
+        val b64 = data.optString("contentBase64")
+        if (b64.isEmpty()) return null
+        return try {
+            withContext(Dispatchers.Default) { Base64.decode(b64, Base64.DEFAULT) }
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+    }
+
+    suspend fun setAvatar(jpeg: ByteArray) {
+        val b64 = withContext(Dispatchers.Default) { Base64.encodeToString(jpeg, Base64.NO_WRAP) }
+        call("setAvatar", mapOf("mimeType" to "image/jpeg", "contentBase64" to b64))
+    }
+
+    suspend fun deleteAvatar() {
+        call("deleteAvatar")
+    }
+
     suspend fun delete(docId: String) {
         call("deleteDoc", mapOf("docId" to docId))
     }

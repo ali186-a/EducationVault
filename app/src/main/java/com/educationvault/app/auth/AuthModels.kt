@@ -25,6 +25,17 @@ data class LookupInfo(
     val photoUrl: String? = null
 )
 
+/** Rules for a name the person types in Settings. */
+object NameValidator {
+    /** Trimmed name with single spaces, or null if it is empty, too long or contains control characters. */
+    fun clean(raw: String): String? {
+        val s = raw.trim().replace(Regex("\\s+"), " ")
+        if (s.isEmpty() || s.length > 50) return null
+        if (s.any { it.isISOControl() }) return null
+        return s
+    }
+}
+
 /** Name and picture of the signed-in person (from their Google account, if they used Google). */
 data class UserProfile(val name: String, val photoUrl: String?) {
     /** Letter shown in the avatar when there is no picture. */

@@ -77,6 +77,11 @@ class AuthRepository(context: Context) {
         net { firebase.sendVerifyEmail(t) }
     }
 
+    suspend fun updateDisplayName(name: String) {
+        val t = idToken()
+        net { firebase.updateDisplayName(t, name) }
+    }
+
     suspend fun sendPasswordReset(email: String) {
         net { firebase.sendPasswordReset(email.trim()) }
     }

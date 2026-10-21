@@ -14,6 +14,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -233,6 +243,7 @@ private fun LoginScreen(
 private fun GoogleButton(vm: AuthViewModel) {
     if (!AppConfig.isGoogleConfigured) return
     val context = LocalContext.current
+    val ink = Color(0xFF1F1F1F)
     Spacer(Modifier.height(8.dp))
     Text(
         stringResource(R.string.or_divider),
@@ -240,13 +251,28 @@ private fun GoogleButton(vm: AuthViewModel) {
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth()
     )
-    OutlinedButton(
+    // Light "Sign in with Google" button: white, thin grey border, four-colour G
+    Surface(
         onClick = {
             vm.signInWithGoogle { GoogleSignInHelper.fetchIdToken(context, AppConfig.googleWebClientId) }
         },
         enabled = !vm.busy,
-        modifier = Modifier.fillMaxWidth()
-    ) { Text(stringResource(R.string.google_button)) }
+        shape = RoundedCornerShape(6.dp),
+        color = Color.White,
+        contentColor = ink,
+        border = BorderStroke(1.dp, Color(0xFF747775)),
+        modifier = Modifier.fillMaxWidth().height(48.dp)
+    ) {
+        Row(
+            Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(painter = painterResource(R.drawable.ic_google_g), contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(12.dp))
+            Text(stringResource(R.string.google_button), fontSize = 15.sp, fontWeight = FontWeight.Medium, color = ink)
+        }
+    }
     vm.errorDetail?.let {
         // selectable: long-press to copy the technical details
         SelectionContainer {

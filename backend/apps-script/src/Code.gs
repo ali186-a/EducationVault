@@ -7,7 +7,8 @@
 const ACTIONS_ = [
   'ping', 'me', 'listCategories', 'addCategory',
   'listDocs', 'getDoc', 'upload', 'download', 'updateDoc', 'deleteDoc',
-  'inviteUser', 'revokeUser', 'listInvites'
+  'inviteUser', 'revokeUser', 'listInvites',
+  'getAvatar', 'setAvatar', 'deleteAvatar'
 ];
 
 function doGet(e) {
@@ -52,6 +53,9 @@ function route_(req) {
     case 'inviteUser': return ok_(handleInvite_(user, cfg, req));
     case 'revokeUser': return ok_(handleRevoke_(user, cfg, req));
     case 'listInvites': return ok_(handleListInvites_(user));
+    case 'getAvatar': return ok_(handleGetAvatar_(user));
+    case 'setAvatar': return ok_(handleSetAvatar_(user, req));
+    case 'deleteAvatar': return ok_(handleDeleteAvatar_(user));
     default: throw new AppError('BAD_REQUEST', 'Unknown action');
   }
 }

@@ -228,3 +228,43 @@ function handleListInvites_(user) {
   list.sort(function (a, b) { return a.invitedAt < b.invitedAt ? -1 : 1; });
   return { invites: list };
 }
+
+// ---------- profile picture ----------
+// One small JPEG per user, kept in that user's own folder (never in the document list).
+const AVATAR_FILE_NAME_ = '_avatar.jpg';
+const AVATAR_MAX_BYTES_ = 200 * 1024;
+
+function handleSetAvatar_(user, req) {
+  const up = decodeUpload_(req, AVATAR_MAX_BYTES_);
+  if (up.mimeType !== 'image/jpeg') throw new AppError('UNSUPPORTED_TYPE', 'The profile picture must be a JPG image');
+  const folder = getUserFolder_(user.uid);
+  return withLock_(function () {
+    const old = [];
+    const it = folder.getFilesByName(AVATAR_FILE_NAME_);
+    while (it.hasNext()) old.push(it.next());
+    // create the new picture first, so a failure never leaves the user without one
+    folder.createFile(Utilities.newBlob(up.bytes, 'image/jpeg', AVATAR_FILE_NAME_));
+    old.forEach(function (f) { try { f.setTrashed(true); } catch (e) { /* best effort */ } });
+    return { saved: true };
+  });
+}
+
+function handleGetAvatar_(user) {
+  const folder = getUserFolder_(user.uid);
+  const it = folder.getFilesByName(AVATAR_FILE_NAME_);
+  if (!it.hasNext()) return { contentBase64: null };
+  const file = it.next();
+  assertFileInFolder_(file, folder);
+  const bytes = file.getBlob().getBytes();
+  if (!bytes.length || bytes.length > AVATAR_MAX_BYTES_) return { contentBase64: null };
+  return { contentBase64: Utilities.base64Encode(bytes) };
+}
+
+function handleDeleteAvatar_(user) {
+  const folder = getUserFolder_(user.uid);
+  return withLock_(function () {
+    const it = folder.getFilesByName(AVATAR_FILE_NAME_);
+    while (it.hasNext()) it.next().setTrashed(true);
+    return { deleted: true };
+  });
+}

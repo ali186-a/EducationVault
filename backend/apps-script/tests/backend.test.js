@@ -466,3 +466,60 @@ test('open registration: the per-user document limit still applies', () => {
   for (let i = 0; i < 100; i++) ok(env.callAs(carol, 'upload', up(PDF, null, { title: 'Doc ' + i })));
   fail(env.callAs(carol, 'upload', up(PDF)), 'LIMIT_REACHED');
 });
+
+// ---------- profile picture ----------
+const avatarReq = (buf, mime) => ({ mimeType: mime || 'image/jpeg', contentBase64: buf.toString('base64') });
+
+test('avatar: none yet, then save and read back the same bytes', () => {
+  const env = createEnv();
+  const carol = env.addUser({ uid: 'carolUid0004', email: 'carol@example.com' });
+  assert.equal(ok(env.callAs(carol, 'getAvatar')).contentBase64, null);
+  ok(env.callAs(carol, 'setAvatar', avatarReq(JPG)));
+  assert.equal(ok(env.callAs(carol, 'getAvatar')).contentBase64, JPG.toString('base64'));
+});
+
+test('avatar: replacing keeps exactly one picture', () => {
+  const env = createEnv();
+  const carol = env.addUser({ uid: 'carolUid0004', email: 'carol@example.com' });
+  const JPG2 = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(64, 5)]);
+  ok(env.callAs(carol, 'setAvatar', avatarReq(JPG)));
+  ok(env.callAs(carol, 'setAvatar', avatarReq(JPG2)));
+  assert.equal(ok(env.callAs(carol, 'getAvatar')).contentBase64, JPG2.toString('base64'));
+  const live = [...env.drive.items.values()].filter((i) => i.kind === 'file' && i.name === '_avatar.jpg' && !i.trashed);
+  assert.equal(live.length, 1);
+});
+
+test('avatar: users cannot see each other\'s pictures', () => {
+  const env = createEnv();
+  const carol = env.addUser({ uid: 'carolUid0004', email: 'carol@example.com' });
+  const dave = env.addUser({ uid: 'daveUid00005', email: 'dave@example.com' });
+  ok(env.callAs(carol, 'setAvatar', avatarReq(JPG)));
+  assert.equal(ok(env.callAs(dave, 'getAvatar')).contentBase64, null);
+});
+
+test('avatar: it is not a document and does not use the document limit', () => {
+  const env = createEnv();
+  const carol = env.addUser({ uid: 'carolUid0004', email: 'carol@example.com' });
+  ok(env.callAs(carol, 'setAvatar', avatarReq(JPG)));
+  assert.equal(ok(env.callAs(carol, 'listDocs')).items.length, 0);
+});
+
+test('avatar: only small real JPEG images are accepted', () => {
+  const env = createEnv();
+  const carol = env.addUser({ uid: 'carolUid0004', email: 'carol@example.com' });
+  fail(env.callAs(carol, 'setAvatar', avatarReq(PNG, 'image/png')), 'UNSUPPORTED_TYPE');
+  fail(env.callAs(carol, 'setAvatar', avatarReq(PDF, 'image/jpeg')), 'UNSUPPORTED_TYPE');
+  const big = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(201 * 1024, 1)]);
+  fail(env.callAs(carol, 'setAvatar', avatarReq(big)), 'FILE_TOO_LARGE');
+  assert.equal(ok(env.callAs(carol, 'getAvatar')).contentBase64, null);
+});
+
+test('avatar: removing it works, and login is required', () => {
+  const env = createEnv();
+  const carol = env.addUser({ uid: 'carolUid0004', email: 'carol@example.com' });
+  ok(env.callAs(carol, 'setAvatar', avatarReq(JPG)));
+  ok(env.callAs(carol, 'deleteAvatar'));
+  assert.equal(ok(env.callAs(carol, 'getAvatar')).contentBase64, null);
+  fail(env.callAs('forged-token-0123456789abcdef', 'getAvatar'), 'UNAUTHENTICATED');
+  fail(env.callAs('forged-token-0123456789abcdef', 'setAvatar', avatarReq(JPG)), 'UNAUTHENTICATED');
+});

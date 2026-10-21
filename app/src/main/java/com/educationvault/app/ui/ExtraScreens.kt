@@ -1,5 +1,8 @@
 package com.educationvault.app.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,7 +49,7 @@ internal fun SettingsScreen(authVm: AuthViewModel, vm: DocsViewModel) {
             Spacer(Modifier.height(8.dp))
             Text(stringResource(R.string.settings_account), style = MaterialTheme.typography.titleMedium)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ProfileAvatar(profile = vm.profile, email = vm.me.email, size = 56.dp)
+                ProfileAvatar(profile = vm.profile, email = vm.me.email, size = 72.dp, custom = vm.avatar)
                 Spacer(Modifier.width(12.dp))
                 Column {
                     if (vm.profile.name.isNotBlank()) {
@@ -55,6 +58,27 @@ internal fun SettingsScreen(authVm: AuthViewModel, vm: DocsViewModel) {
                     Text(vm.me.email, style = MaterialTheme.typography.bodyMedium)
                 }
             }
+            val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                vm.onAvatarPicked(uri)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                    enabled = !vm.busy
+                ) { Text(stringResource(R.string.avatar_change)) }
+                if (vm.avatar != null) {
+                    OutlinedButton(onClick = { vm.removeAvatar() }, enabled = !vm.busy) {
+                        Text(stringResource(R.string.avatar_remove))
+                    }
+                }
+            }
+            var name by rememberSaveable(vm.profile.name) { mutableStateOf(vm.profile.name) }
+            TextInput(name, { name = it }, R.string.name_label, !vm.busy)
+            OutlinedButton(
+                onClick = { vm.updateName(name) },
+                enabled = !vm.busy && name.trim() != vm.profile.name,
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(R.string.name_save)) }
             Text(stringResource(R.string.upload_limit_note, Formatting.formatSize(vm.me.maxUploadBytes)))
             Text(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME))
             Spacer(Modifier.height(8.dp))

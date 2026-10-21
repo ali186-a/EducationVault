@@ -47,6 +47,14 @@ class FirebaseAuthApi(private val apiKey: String) {
     suspend fun lookup(idToken: String): LookupInfo =
         FirebaseParser.parseLookup(accounts("lookup", JSONObject().put("idToken", idToken)))
 
+    /** Changes the name shown in the app (the profile picture is left untouched). */
+    suspend fun updateDisplayName(idToken: String, name: String) {
+        accounts(
+            "update",
+            JSONObject().put("idToken", idToken).put("displayName", name).put("returnSecureToken", false)
+        )
+    }
+
     suspend fun sendVerifyEmail(idToken: String) {
         accounts("sendOobCode", JSONObject().put("requestType", "VERIFY_EMAIL").put("idToken", idToken))
     }

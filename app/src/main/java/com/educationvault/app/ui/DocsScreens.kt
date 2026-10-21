@@ -206,7 +206,8 @@ private fun HomeHeader(authVm: AuthViewModel, vm: DocsViewModel) {
                 profile = vm.profile,
                 email = vm.me.email,
                 size = 40.dp,
-                modifier = Modifier.clickable { menuOpen = true }
+                modifier = Modifier.clickable { menuOpen = true },
+                custom = vm.avatar
             )
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                 DropdownMenuItem(

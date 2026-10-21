@@ -19,7 +19,9 @@ import com.educationvault.app.AppContainer
 import com.educationvault.app.R
 import com.educationvault.app.auth.AuthError
 import com.educationvault.app.auth.AuthException
+import com.educationvault.app.auth.NameValidator
 import com.educationvault.app.auth.UserProfile
+import com.educationvault.app.docs.AvatarProcessor
 import com.educationvault.app.docs.Category
 import com.educationvault.app.docs.DocItem
 import com.educationvault.app.docs.DocsException
@@ -82,7 +84,12 @@ private fun docsErrorRes(code: String): Int = when (code) {
     else -> R.string.err_unknown
 }
 
-class DocsViewModel(app: Application, val me: MeInfo, val profile: UserProfile) : AndroidViewModel(app) {
+class DocsViewModel(app: Application, val me: MeInfo, initialProfile: UserProfile) : AndroidViewModel(app) {
+
+    /** Name and picture; the name can be changed in Settings. */
+    var profile by mutableStateOf(initialProfile)
+        private set
+
 
     class Factory(
         private val app: Application,
@@ -583,6 +590,86 @@ class DocsViewModel(app: Application, val me: MeInfo, val profile: UserProfile) 
     }
 
     // ----- settings -----
+    // ----- profile picture (own picture, stored in the person's own folder) -----
+    var avatar by mutableStateOf<Bitmap?>(null)
+        private set
+
+    private fun loadAvatar() {
+        viewModelScope.launch {
+            try {
+                val bytes = repo.getAvatar() ?: return@launch
+                avatar = withContext(Dispatchers.Default) { PreviewRenderer.decodeImage(bytes) }
+            } catch (e: AuthException) {
+                if (endsSession(e)) onSessionEnded?.invoke()
+            } catch (e: DocsException) {
+                // the picture is optional: ignore everything except an ended session
+                if (endsSession(e)) onSessionEnded?.invoke()
+            }
+        }
+    }
+
+    fun onAvatarPicked(uri: Uri?) {
+        if (uri == null) return
+        launchBusy {
+            val resolver = getApplication<Application>().contentResolver
+            val processed = withContext(Dispatchers.IO) {
+                try {
+                    val bytes = resolver.openInputStream(uri)?.use { FileSupport.readLimited(it, 15L * 1024 * 1024) }
+                    if (bytes == null) null else AvatarProcessor.process(bytes)
+                } catch (e: IOException) {
+                    null
+                } catch (e: SecurityException) {
+                    null
+                }
+            }
+            if (processed == null) {
+                errorRes = R.string.err_avatar_invalid
+                return@launchBusy
+            }
+            try {
+                repo.setAvatar(processed.jpeg)
+                avatar = processed.bitmap
+                infoRes = R.string.avatar_saved
+            } catch (e: AuthException) {
+                errorRes = handle(e)
+            } catch (e: DocsException) {
+                errorRes = handle(e)
+            }
+        }
+    }
+
+    fun removeAvatar() {
+        launchBusy {
+            try {
+                repo.deleteAvatar()
+                avatar = null
+                infoRes = R.string.avatar_removed
+            } catch (e: AuthException) {
+                errorRes = handle(e)
+            } catch (e: DocsException) {
+                errorRes = handle(e)
+            }
+        }
+    }
+
+    fun updateName(raw: String) {
+        val name = NameValidator.clean(raw)
+        if (name == null) {
+            infoRes = null
+            errorRes = R.string.err_name_invalid
+            return
+        }
+        launchBusy {
+            try {
+                AppContainer.auth(getApplication<Application>()).updateDisplayName(name)
+                profile = UserProfile(name, profile.photoUrl)
+                infoRes = R.string.name_saved
+            } catch (e: AuthException) {
+                errorRes = handle(e)
+            }
+        }
+    }
+
     fun sendPasswordResetToSelf() {
         launchBusy {
             try {
@@ -599,5 +686,6 @@ class DocsViewModel(app: Application, val me: MeInfo, val profile: UserProfile) 
         runCatching { pdfFile.delete() } // never leave an old decrypted copy behind
         runCatching { cameraDir.deleteRecursively() }
         refreshCategories()
+        loadAvatar()
     }
 }

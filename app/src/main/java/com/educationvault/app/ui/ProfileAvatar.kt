@@ -62,13 +62,20 @@ object AvatarLoader {
     }
 }
 
-/** Round profile picture; shows the first letter of the name (or email) when there is no picture. */
+/** Round profile picture (own picture, else Google picture); shows the first letter of the name (or email) when there is no picture. */
 @Composable
-fun ProfileAvatar(profile: UserProfile, email: String, size: Dp, modifier: Modifier = Modifier) {
+fun ProfileAvatar(
+    profile: UserProfile,
+    email: String,
+    size: Dp,
+    modifier: Modifier = Modifier,
+    custom: Bitmap? = null // the picture the person chose in this app; it wins over the Google picture
+) {
     val url = profile.photoUrl
-    val bitmap by produceState<Bitmap?>(initialValue = url?.let { AvatarLoader.cached(it) }, url) {
-        value = if (url == null) null else AvatarLoader.load(url)
+    val remote by produceState<Bitmap?>(initialValue = url?.let { AvatarLoader.cached(it) }, url, custom) {
+        value = if (url == null || custom != null) null else AvatarLoader.load(url)
     }
+    val bitmap = custom ?: remote
     Box(
         modifier.size(size).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
         contentAlignment = Alignment.Center
