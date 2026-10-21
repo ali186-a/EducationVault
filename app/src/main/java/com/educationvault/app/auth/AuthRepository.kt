@@ -101,7 +101,10 @@ class AuthRepository(context: Context) {
         val info = net { firebase.lookup(t) }
         if (!info.emailVerified) return AccessResult.NeedsVerification(info.email)
         return when (val r = net { backend.call("me", t) }) {
-            is BackendResult.Ok -> AccessResult.Ready(MeInfo.fromJson(r.data))
+            is BackendResult.Ok -> AccessResult.Ready(
+                MeInfo.fromJson(r.data),
+                UserProfile(info.displayName, info.photoUrl)
+            )
             is BackendResult.Err -> when (r.code) {
                 "NOT_INVITED" -> AccessResult.NotInvited(info.email)
                 "EMAIL_NOT_VERIFIED" -> AccessResult.NeedsVerification(info.email)

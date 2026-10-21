@@ -14,6 +14,7 @@ import com.educationvault.app.auth.AccessResult
 import com.educationvault.app.auth.AuthError
 import com.educationvault.app.auth.AuthException
 import com.educationvault.app.auth.GoogleResult
+import com.educationvault.app.auth.UserProfile
 import com.educationvault.app.net.BackendFailure
 import com.educationvault.app.net.MeInfo
 import kotlinx.coroutines.launch
@@ -24,7 +25,7 @@ sealed interface AuthUiState {
     data object SignedOut : AuthUiState
     data class NeedsVerification(val email: String) : AuthUiState
     data class NotInvited(val email: String) : AuthUiState
-    data class Ready(val me: MeInfo, val session: Int) : AuthUiState
+    data class Ready(val me: MeInfo, val session: Int, val profile: UserProfile) : AuthUiState
 }
 
 fun InputValidator.Problem.toRes(): Int = when (this) {
@@ -117,7 +118,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             state = when (val r = repo.checkAccess()) {
                 is AccessResult.NeedsVerification -> AuthUiState.NeedsVerification(r.email)
                 is AccessResult.NotInvited -> AuthUiState.NotInvited(r.email)
-                is AccessResult.Ready -> AuthUiState.Ready(r.me, ++sessionCounter)
+                is AccessResult.Ready -> AuthUiState.Ready(r.me, ++sessionCounter, r.profile)
             }
         } catch (e: AuthException) {
             failWith(e.error.toRes(), e.error == AuthError.SESSION_EXPIRED)

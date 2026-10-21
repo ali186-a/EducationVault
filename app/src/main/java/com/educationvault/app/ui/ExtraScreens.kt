@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -43,7 +45,16 @@ internal fun SettingsScreen(authVm: AuthViewModel, vm: DocsViewModel) {
             LanguageSwitcher()
             Spacer(Modifier.height(8.dp))
             Text(stringResource(R.string.settings_account), style = MaterialTheme.typography.titleMedium)
-            Text(vm.me.email)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ProfileAvatar(profile = vm.profile, email = vm.me.email, size = 56.dp)
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    if (vm.profile.name.isNotBlank()) {
+                        Text(vm.profile.name, style = MaterialTheme.typography.titleMedium)
+                    }
+                    Text(vm.me.email, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
             Text(stringResource(R.string.upload_limit_note, Formatting.formatSize(vm.me.maxUploadBytes)))
             Text(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME))
             Spacer(Modifier.height(8.dp))
@@ -57,33 +68,6 @@ internal fun SettingsScreen(authVm: AuthViewModel, vm: DocsViewModel) {
             OutlinedButton(onClick = { authVm.signOut() }, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.logout_button))
             }
-        }
-    }
-}
-
-// ---------- backup / storage information ----------
-
-@Composable
-private fun InfoSection(titleRes: Int, bodyRes: Int) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(titleRes), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-        Text(stringResource(bodyRes))
-    }
-}
-
-@Composable
-internal fun BackupScreen(vm: DocsViewModel) {
-    DocsScaffold(R.string.backup_title, vm) {
-        Column(
-            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(stringResource(R.string.backup_count, vm.statsTotal?.toString() ?: "…"), style = MaterialTheme.typography.titleMedium)
-            InfoSection(R.string.backup_where, R.string.backup_where_body)
-            InfoSection(R.string.backup_trash, R.string.backup_trash_body)
-            InfoSection(R.string.backup_copy, R.string.backup_copy_body)
-            InfoSection(R.string.backup_space, R.string.backup_space_body)
-            InfoSection(R.string.backup_privacy, R.string.backup_privacy_body)
         }
     }
 }

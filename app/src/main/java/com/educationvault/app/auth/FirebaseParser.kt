@@ -83,10 +83,23 @@ object FirebaseParser {
     fun parseLookup(body: String): LookupInfo = parsing {
         val users = JSONObject(body).optJSONArray("users")
         val u = users?.optJSONObject(0) ?: throw AuthException(AuthError.SESSION_EXPIRED)
+        // Name/picture: top-level fields first, then the linked sign-in provider (e.g. google.com)
+        var name = u.optString("displayName").trim()
+        var photo = u.optString("photoUrl").trim()
+        val providers = u.optJSONArray("providerUserInfo")
+        if (providers != null) {
+            for (i in 0 until providers.length()) {
+                val p = providers.optJSONObject(i) ?: continue
+                if (name.isEmpty()) name = p.optString("displayName").trim()
+                if (photo.isEmpty()) photo = p.optString("photoUrl").trim()
+            }
+        }
         LookupInfo(
             uid = u.getString("localId"),
             email = u.optString("email").trim().lowercase(),
-            emailVerified = u.optBoolean("emailVerified", false)
+            emailVerified = u.optBoolean("emailVerified", false),
+            displayName = name,
+            photoUrl = photo.ifEmpty { null }
         )
     }
 }

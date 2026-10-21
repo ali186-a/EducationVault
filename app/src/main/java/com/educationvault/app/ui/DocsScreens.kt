@@ -82,6 +82,7 @@ import com.educationvault.app.docs.DocItem
 import com.educationvault.app.docs.Formatting
 import com.educationvault.app.docs.categoryLabel
 import com.educationvault.app.docs.label
+import com.educationvault.app.auth.UserProfile
 import com.educationvault.app.net.MeInfo
 
 @Composable
@@ -90,9 +91,9 @@ private fun isUrdu(): Boolean = LanguageStore.get(LocalContext.current) == Langu
 // ---------- root ----------
 
 @Composable
-fun DocsRoot(authVm: AuthViewModel, me: MeInfo, session: Int) {
+fun DocsRoot(authVm: AuthViewModel, me: MeInfo, session: Int, profile: UserProfile) {
     val app = LocalContext.current.applicationContext as Application
-    val vm = viewModel<DocsViewModel>(key = "docs-" + me.uid + "-" + session, factory = DocsViewModel.Factory(app, me))
+    val vm = viewModel<DocsViewModel>(key = "docs-" + me.uid + "-" + session, factory = DocsViewModel.Factory(app, me, profile))
     vm.onSessionEnded = { authVm.onSessionExpired() }
     BackHandler(enabled = vm.stack.size > 1) { if (!vm.busy) vm.pop() }
 
@@ -103,7 +104,6 @@ fun DocsRoot(authVm: AuthViewModel, me: MeInfo, session: Int) {
         is Route.Detail -> DetailScreen(vm, r.docId)
         is Route.Edit -> EditScreen(vm, r.docId)
         Route.Settings -> SettingsScreen(authVm, vm)
-        Route.Backup -> BackupScreen(vm)
     }
 }
 
@@ -191,24 +191,39 @@ private fun HomeHeader(authVm: AuthViewModel, vm: DocsViewModel) {
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Text(stringResource(R.string.home_brand), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(
+                stringResource(R.string.home_welcome, vm.profile.shortName(vm.me.email)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
         LanguagePill()
         Spacer(Modifier.width(8.dp))
         Box {
-            Box(
-                Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { menuOpen = true },
-                contentAlignment = Alignment.Center
-            ) { Text("\uD83D\uDC64", fontSize = 18.sp) }
+            ProfileAvatar(
+                profile = vm.profile,
+                email = vm.me.email,
+                size = 40.dp,
+                modifier = Modifier.clickable { menuOpen = true }
+            )
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                DropdownMenuItem(text = { Text(vm.me.email) }, onClick = {}, enabled = false)
+                DropdownMenuItem(
+                    text = {
+                        Column {
+                            if (vm.profile.name.isNotBlank()) {
+                                Text(vm.profile.name, fontWeight = FontWeight.Bold)
+                            }
+                            Text(vm.me.email, style = MaterialTheme.typography.bodySmall)
+                        }
+                    },
+                    onClick = {},
+                    enabled = false
+                )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_settings)) },
                     onClick = { menuOpen = false; vm.push(Route.Settings) }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.action_backup)) },
-                    onClick = { menuOpen = false; vm.openBackupInfo() }
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.logout_button), color = MaterialTheme.colorScheme.error) },

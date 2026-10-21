@@ -19,6 +19,7 @@ import com.educationvault.app.AppContainer
 import com.educationvault.app.R
 import com.educationvault.app.auth.AuthError
 import com.educationvault.app.auth.AuthException
+import com.educationvault.app.auth.UserProfile
 import com.educationvault.app.docs.Category
 import com.educationvault.app.docs.DocItem
 import com.educationvault.app.docs.DocsException
@@ -46,7 +47,6 @@ sealed interface Route {
     data class Detail(val docId: String) : Route
     data class Edit(val docId: String) : Route
     data object Settings : Route
-    data object Backup : Route
 }
 
 sealed interface Preview {
@@ -82,11 +82,15 @@ private fun docsErrorRes(code: String): Int = when (code) {
     else -> R.string.err_unknown
 }
 
-class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
+class DocsViewModel(app: Application, val me: MeInfo, val profile: UserProfile) : AndroidViewModel(app) {
 
-    class Factory(private val app: Application, private val me: MeInfo) : ViewModelProvider.Factory {
+    class Factory(
+        private val app: Application,
+        private val me: MeInfo,
+        private val profile: UserProfile
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T = DocsViewModel(app, me) as T
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = DocsViewModel(app, me, profile) as T
     }
 
     private val repo = DocumentsRepository(AppContainer.auth(app))
@@ -578,24 +582,7 @@ class DocsViewModel(app: Application, val me: MeInfo) : AndroidViewModel(app) {
         }
     }
 
-    // ----- settings / backup info -----
-    var statsTotal by mutableStateOf<Int?>(null)
-        private set
-
-    fun openBackupInfo() {
-        statsTotal = null
-        push(Route.Backup)
-        viewModelScope.launch {
-            try {
-                statsTotal = repo.list(null, "", null, 1).total
-            } catch (e: AuthException) {
-                if (endsSession(e)) onSessionEnded?.invoke()
-            } catch (e: DocsException) {
-                if (endsSession(e)) onSessionEnded?.invoke()
-            }
-        }
-    }
-
+    // ----- settings -----
     fun sendPasswordResetToSelf() {
         launchBusy {
             try {

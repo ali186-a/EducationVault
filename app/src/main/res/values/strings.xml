@@ -152,25 +152,12 @@
     <string name="action_camera">کیمرے سے تصویر لیں</string>
     <string name="err_no_camera">کیمرہ ایپ نہیں کھل سکی۔ فائل چن کر اپ لوڈ کریں۔</string>
     <string name="action_settings">سیٹنگز</string>
-    <string name="action_backup">بیک اپ اور اسٹوریج کی معلومات</string>
     <string name="settings_title">سیٹنگز</string>
     <string name="settings_language">زبان</string>
     <string name="settings_account">اکاؤنٹ</string>
     <string name="settings_version">ایپ ورژن: %1$s</string>
     <string name="settings_password">پاس ورڈ بدلنے کا ای میل بھیجیں</string>
     <string name="settings_password_hint">آپ کے ای میل پر ایک لنک آئے گا۔ اس سے نیا پاس ورڈ بنائیں۔</string>
-    <string name="backup_title">بیک اپ اور اسٹوریج</string>
-    <string name="backup_count">آپ کی کل دستاویزات: %1$s</string>
-    <string name="backup_where">آپ کی فائلیں کہاں ہیں</string>
-    <string name="backup_where_body">تمام فائلیں ایپ کے مالک کے Google Drive میں ایک الگ فولڈر میں محفوظ ہوتی ہیں۔ ہر صارف کا اپنا فولڈر ہے اور ایپ میں ایک صارف دوسرے کی فائلیں نہیں دیکھ سکتا۔</string>
-    <string name="backup_trash">حذف شدہ فائلیں</string>
-    <string name="backup_trash_body">حذف کی ہوئی فائل Drive کے Trash میں جاتی ہے اور تقریباً 30 دن بعد مستقل طور پر ختم ہو جاتی ہے۔ بحالی کے لیے ایپ کے مالک سے رابطہ کریں۔</string>
-    <string name="backup_copy">اپنی کاپی کیسے رکھیں</string>
-    <string name="backup_copy_body">دستاویز کھول کر \"ڈیوائس میں محفوظ کریں\" دبائیں تاکہ آپ کے پاس اپنی کاپی رہے۔</string>
-    <string name="backup_space">جگہ اور خرچ</string>
-    <string name="backup_space_body">فائلیں ایپ کے مالک کے Drive کی جگہ میں گنی جاتی ہیں، اس لیے ہر صارف کے لیے دستاویزات کی حد مقرر ہے۔ ایپ خود کوئی فیس نہیں لیتی۔</string>
-    <string name="backup_privacy">رازداری</string>
-    <string name="backup_privacy_body">چونکہ فائلیں ایپ کے مالک کے Drive میں رکھی جاتی ہیں، مالک انہیں اپنے Drive میں دیکھ سکتا ہے۔ ایسی دستاویزات اپ لوڈ نہ کریں جو آپ مالک سے چھپانا چاہتے ہوں۔</string>
 
     <!-- Google sign-in -->
     <string name="google_button">Google اکاؤنٹ سے جاری رکھیں</string>
@@ -188,4 +175,5 @@
     <string name="add_custom">+ نیا زمرہ</string>
     <string name="files_one">1 فائل</string>
     <string name="files_many">%1$d فائلیں</string>
+    <string name="home_welcome">خوش آمدید، %1$s</string>
 </resources>

@@ -156,7 +156,7 @@ fun AppRoot(vm: AuthViewModel = viewModel()) {
         AuthUiState.SignedOut -> SignedOutFlow(vm)
         is AuthUiState.NeedsVerification -> VerifyScreen(vm, s.email)
         is AuthUiState.NotInvited -> NotInvitedScreen(vm, s.email)
-        is AuthUiState.Ready -> DocsRoot(vm, s.me, s.session)
+        is AuthUiState.Ready -> DocsRoot(vm, s.me, s.session, s.profile)
     }
 }
 
