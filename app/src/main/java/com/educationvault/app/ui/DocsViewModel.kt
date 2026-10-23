@@ -15,7 +15,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.educationvault.app.AppConfig
 import com.educationvault.app.AppContainer
+import com.educationvault.app.BuildConfig
 import com.educationvault.app.R
 import com.educationvault.app.auth.AuthError
 import com.educationvault.app.auth.AuthException
@@ -33,7 +35,11 @@ import com.educationvault.app.docs.NewDoc
 import com.educationvault.app.docs.PickResult
 import com.educationvault.app.docs.PickedFile
 import com.educationvault.app.docs.PreviewRenderer
+import com.educationvault.app.net.BackendApi
+import com.educationvault.app.net.BackendResult
 import com.educationvault.app.net.MeInfo
+import com.educationvault.app.update.UpdateDecision
+import com.educationvault.app.update.UpdateLogic
 import java.io.File
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +47,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.cancellation.CancellationException
 
 sealed interface Route {
     data object Home : Route
@@ -590,6 +597,31 @@ class DocsViewModel(app: Application, val me: MeInfo, initialProfile: UserProfil
     }
 
     // ----- settings -----
+    // ----- app update offer -----
+    var update by mutableStateOf<UpdateDecision>(UpdateDecision.None)
+        private set
+
+    /** Asks the backend (no login needed) which app version is the newest. Any failure is silent. */
+    private fun checkForUpdate() {
+        viewModelScope.launch {
+            try {
+                val r = BackendApi(AppConfig.appsScriptUrl).call("appVersion", null)
+                if (r is BackendResult.Ok) {
+                    update = UpdateLogic.decide(BuildConfig.VERSION_CODE, UpdateLogic.parse(r.data))
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // no internet or old backend: simply no update offer
+            }
+        }
+    }
+
+    /** "Later": only an optional update can be put off; a required one stays. */
+    fun dismissUpdate() {
+        if (update is UpdateDecision.Optional) update = UpdateDecision.None
+    }
+
     // ----- profile picture (own picture, stored in the person's own folder) -----
     var avatar by mutableStateOf<Bitmap?>(null)
         private set
@@ -687,5 +719,6 @@ class DocsViewModel(app: Application, val me: MeInfo, initialProfile: UserProfil
         runCatching { cameraDir.deleteRecursively() }
         refreshCategories()
         loadAvatar()
+        checkForUpdate()
     }
 }

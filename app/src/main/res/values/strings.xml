@@ -185,4 +185,9 @@
     <string name="avatar_saved">پروفائل تصویر محفوظ ہو گئی۔</string>
     <string name="avatar_removed">پروفائل تصویر ہٹا دی گئی۔</string>
     <string name="err_avatar_invalid">تصویر کھل نہیں سکی۔ کوئی دوسری تصویر چنیں۔</string>
+    <string name="update_title">نیا ورژن دستیاب ہے</string>
+    <string name="update_body">ایپ کا نیا ورژن %1$s دستیاب ہے۔ کیا آپ اپڈیٹ کرنا چاہتے ہیں؟</string>
+    <string name="update_required_body">ایپ جاری رکھنے کے لیے نیا ورژن %1$s انسٹال کرنا ضروری ہے۔</string>
+    <string name="update_button">اپڈیٹ کریں</string>
+    <string name="update_later">بعد میں</string>
 </resources>

@@ -523,3 +523,41 @@ test('avatar: removing it works, and login is required', () => {
   fail(env.callAs('forged-token-0123456789abcdef', 'getAvatar'), 'UNAUTHENTICATED');
   fail(env.callAs('forged-token-0123456789abcdef', 'setAvatar', avatarReq(JPG)), 'UNAUTHENTICATED');
 });
+
+// ---------- app update information ----------
+test('appVersion: needs no login and is empty until the owner sets it', () => {
+  const env = createEnv();
+  const v = ok(env.call({ action: 'appVersion' }));
+  assert.deepEqual(v, { latestVersionCode: 0, latestVersionName: '', minVersionCode: 0, updateUrl: '', notes: '' });
+});
+
+test('appVersion: returns what the owner configured', () => {
+  const env = createEnv({ props: {
+    LATEST_VERSION_CODE: '12', LATEST_VERSION_NAME: '1.0', MIN_VERSION_CODE: '10',
+    UPDATE_URL: 'https://example.com/EducationVault.apk', UPDATE_NOTES: 'Bug fixes'
+  } });
+  const v = ok(env.call({ action: 'appVersion' }));
+  assert.equal(v.latestVersionCode, 12);
+  assert.equal(v.latestVersionName, '1.0');
+  assert.equal(v.minVersionCode, 10);
+  assert.equal(v.updateUrl, 'https://example.com/EducationVault.apk');
+  assert.equal(v.notes, 'Bug fixes');
+});
+
+test('appVersion: unsafe links and junk numbers are not passed on', () => {
+  for (const bad of ['http://example.com/a.apk', 'javascript:alert(1)', 'intent://x#Intent;end', 'https://exa mple.com', 'ftp://x.com/a']) {
+    const env = createEnv({ props: { UPDATE_URL: bad } });
+    assert.equal(ok(env.call({ action: 'appVersion' })).updateUrl, '', bad);
+  }
+  const env = createEnv({ props: { LATEST_VERSION_CODE: 'abc', MIN_VERSION_CODE: '-5' } });
+  const v = ok(env.call({ action: 'appVersion' }));
+  assert.equal(v.latestVersionCode, 0);
+  assert.equal(v.minVersionCode, 0);
+});
+
+test('appVersion: very long text is cut short', () => {
+  const env = createEnv({ props: { UPDATE_NOTES: 'x'.repeat(1000), LATEST_VERSION_NAME: 'v'.repeat(100) } });
+  const v = ok(env.call({ action: 'appVersion' }));
+  assert.equal(v.notes.length, 300);
+  assert.equal(v.latestVersionName.length, 30);
+});

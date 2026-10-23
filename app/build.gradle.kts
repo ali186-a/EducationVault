@@ -26,8 +26,9 @@ android {
         applicationId = "com.educationvault.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        // On GitHub the build number (-PversionCode=...) rises by one on every build, so each APK is a real update.
+        versionCode = (project.findProperty("versionCode") as String?)?.toIntOrNull() ?: 1
+        versionName = "1.0"
 
         buildConfigField("String", "FIREBASE_API_KEY", quoted(cfg("FIREBASE_API_KEY")))
         buildConfigField("String", "FIREBASE_PROJECT_ID", quoted(cfg("FIREBASE_PROJECT_ID")))

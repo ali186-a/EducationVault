@@ -8,7 +8,7 @@ const ACTIONS_ = [
   'ping', 'me', 'listCategories', 'addCategory',
   'listDocs', 'getDoc', 'upload', 'download', 'updateDoc', 'deleteDoc',
   'inviteUser', 'revokeUser', 'listInvites',
-  'getAvatar', 'setAvatar', 'deleteAvatar'
+  'getAvatar', 'setAvatar', 'deleteAvatar', 'appVersion'
 ];
 
 function doGet(e) {
@@ -36,6 +36,8 @@ function parseRequest_(e) {
 
 function route_(req) {
   if (req.action === 'ping') return ok_({ service: 'EducationVault', configured: isConfigured_() });
+  // Public (no login): the app asks this at start to offer an update. Contains no private data.
+  if (req.action === 'appVersion') return ok_(handleAppVersion_());
 
   const cfg = getConfig_();
   const user = authorize_(req.idToken, cfg);

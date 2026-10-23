@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # needed only to publish the APK as a GitHub Release
 
 jobs:
   build:
@@ -42,7 +42,7 @@ jobs:
         run: gradle --no-daemon --stacktrace :app:testDebugUnitTest
 
       - name: Build debug APK
-        run: gradle --no-daemon --stacktrace :app:assembleDebug
+        run: gradle --no-daemon --stacktrace :app:assembleDebug -PversionCode=${{ github.run_number }}
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
@@ -50,6 +50,21 @@ jobs:
           name: EducationVault-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # A permanent download page: https://github.com/<you>/<repo>/releases/latest
+      # (failure here never fails the build; the APK is still in the artifact above)
+      - name: Publish APK as a GitHub Release
+        if: github.ref_name == github.event.repository.default_branch
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOTES: ${{ github.event.head_commit.message }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk EducationVault.apk
+          gh release create "build-${{ github.run_number }}" EducationVault.apk \
+            --title "Build ${{ github.run_number }}" \
+            --notes "${NOTES:-Automatic build}" \
+            --target "${{ github.sha }}" --latest
 
       - name: Upload test reports (on failure)
         if: failure()

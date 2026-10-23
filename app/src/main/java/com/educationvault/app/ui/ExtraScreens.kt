@@ -80,7 +80,7 @@ internal fun SettingsScreen(authVm: AuthViewModel, vm: DocsViewModel) {
                 modifier = Modifier.fillMaxWidth()
             ) { Text(stringResource(R.string.name_save)) }
             Text(stringResource(R.string.upload_limit_note, Formatting.formatSize(vm.me.maxUploadBytes)))
-            Text(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME))
+            Text(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")"))
             Spacer(Modifier.height(8.dp))
             Text(stringResource(R.string.settings_password_hint), style = MaterialTheme.typography.bodySmall)
             Messages(vm.errorRes, vm.infoRes)

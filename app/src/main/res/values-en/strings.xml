@@ -179,4 +179,9 @@
     <string name="avatar_saved">Your profile picture has been saved.</string>
     <string name="avatar_removed">Your profile picture has been removed.</string>
     <string name="err_avatar_invalid">The picture could not be opened. Choose another one.</string>
+    <string name="update_title">A new version is available</string>
+    <string name="update_body">Version %1$s of the app is available. Do you want to update?</string>
+    <string name="update_required_body">You need to install version %1$s to keep using the app.</string>
+    <string name="update_button">Update</string>
+    <string name="update_later">Later</string>
 </resources>

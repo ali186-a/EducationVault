@@ -2,6 +2,10 @@ package com.educationvault.app.ui
 
 import android.app.Application
 import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.window.DialogProperties
+import com.educationvault.app.update.UpdateDecision
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -96,6 +100,7 @@ fun DocsRoot(authVm: AuthViewModel, me: MeInfo, session: Int, profile: UserProfi
     val vm = viewModel<DocsViewModel>(key = "docs-" + me.uid + "-" + session, factory = DocsViewModel.Factory(app, me, profile))
     vm.onSessionEnded = { authVm.onSessionExpired() }
     BackHandler(enabled = vm.stack.size > 1) { if (!vm.busy) vm.pop() }
+    UpdateOffer(vm)
 
     when (val r = vm.route) {
         Route.Home -> HomeScreen(authVm, vm)
@@ -105,6 +110,48 @@ fun DocsRoot(authVm: AuthViewModel, me: MeInfo, session: Int, profile: UserProfi
         is Route.Edit -> EditScreen(vm, r.docId)
         Route.Settings -> SettingsScreen(authVm, vm)
     }
+}
+
+@Composable
+private fun UpdateOffer(vm: DocsViewModel) {
+    val decision = vm.update
+    val info = when (decision) {
+        is UpdateDecision.Optional -> decision.info
+        is UpdateDecision.Required -> decision.info
+        UpdateDecision.None -> return
+    }
+    val required = decision is UpdateDecision.Required
+    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = { vm.dismissUpdate() },
+        properties = DialogProperties(dismissOnBackPress = !required, dismissOnClickOutside = !required),
+        title = { Text(stringResource(R.string.update_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    stringResource(
+                        if (required) R.string.update_required_body else R.string.update_body,
+                        info.label
+                    )
+                )
+                if (info.notes.isNotBlank()) Text(info.notes, style = MaterialTheme.typography.bodySmall)
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                try {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.url)))
+                } catch (e: ActivityNotFoundException) {
+                    // no browser: nothing we can do
+                }
+            }) { Text(stringResource(R.string.update_button)) }
+        },
+        dismissButton = {
+            if (!required) {
+                TextButton(onClick = { vm.dismissUpdate() }) { Text(stringResource(R.string.update_later)) }
+            }
+        }
+    )
 }
 
 @Composable

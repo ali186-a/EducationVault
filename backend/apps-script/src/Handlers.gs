@@ -268,3 +268,24 @@ function handleDeleteAvatar_(user) {
     return { deleted: true };
   });
 }
+
+// ---------- app update information (public) ----------
+// The owner sets these Script Properties after publishing a new APK:
+//   LATEST_VERSION_CODE (number), LATEST_VERSION_NAME (text), UPDATE_URL (https link to the APK or its page),
+//   MIN_VERSION_CODE (optional: older versions are told the update is required), UPDATE_NOTES (optional text)
+function handleAppVersion_() {
+  const p = PropertiesService.getScriptProperties();
+  const intProp = function (k) {
+    const n = parseInt(String(p.getProperty(k) || '').trim(), 10);
+    return isFinite(n) && n > 0 ? n : 0;
+  };
+  const textProp = function (k, max) { return String(p.getProperty(k) || '').trim().slice(0, max); };
+  const url = textProp('UPDATE_URL', 500);
+  return {
+    latestVersionCode: intProp('LATEST_VERSION_CODE'),
+    latestVersionName: textProp('LATEST_VERSION_NAME', 30),
+    minVersionCode: intProp('MIN_VERSION_CODE'),
+    updateUrl: /^https:\/\/[^\s]+$/.test(url) ? url : '',
+    notes: textProp('UPDATE_NOTES', 300)
+  };
+}
